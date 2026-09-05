@@ -1,22 +1,52 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { Inbox, Mail, PenLine, Search, Send, Settings, Star, Trash2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Inbox, Mail, PenLine, Search, Send, Settings, Star, Trash2, LogOut } from 'lucide-react';
+import { getSupabaseBrowser } from '@/lib/supabase-browser';
 
-const demoMessages = [
-  { id: '1', sender: 'Waste2Light Team', email: 'team@waste2light.com', subject: 'Welcome to ABEmail Mail', preview: 'Your company mailbox is ready to use.', time: '08:42', unread: true },
-  { id: '2', sender: 'Operations', email: 'operations@example.com', subject: 'Weekly operations update', preview: 'Here are the items that need your attention this week.', time: 'Yesterday', unread: true },
-  { id: '3', sender: 'Emmanuel', email: 'emmanuel@waste2light.com', subject: 'Project notes', preview: 'I have added the latest notes to the shared folder.', time: 'Fri', unread: false },
-];
+type Message = {
+  id: string;
+  direction: 'inbound' | 'outbound';
+  from_address: string;
+  to_addresses: string[];
+  subject: string;
+  html_body: string | null;
+  text_body: string | null;
+  created_at: string;
+  status: string;
+};
 
 export default function Home() {
   const [folder, setFolder] = useState('Inbox');
   const [composerOpen, setComposerOpen] = useState(false);
   const [query, setQuery] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [selected, setSelected] = useState<Message | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = useMemo(() => demoMessages.filter((message) =>
-    `${message.sender} ${message.email} ${message.subject} ${message.preview}`.toLowerCase().includes(query.toLowerCase())
-  ), [query]);
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/inbox').then(async (response) => {
+      if (response.status === 401) { window.location.href = '/login'; return; }
+      const data = await response.json();
+      if (mounted) setMessages(data.messages ?? []);
+    }).catch(console.error).finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const folderMessages = messages.filter((message) => {
+      if (folder === 'Inbox') return message.direction === 'inbound';
+      if (folder === 'Sent') return message.direction === 'outbound';
+      return true;
+    });
+    return folderMessages.filter((message) => `${message.from_address} ${message.to_addresses.join(' ')} ${message.subject}`.toLowerCase().includes(query.toLowerCase()));
+  }, [folder, messages, query]);
+
+  async function logout() {
+    await getSupabaseBrowser().auth.signOut();
+    window.location.href = '/login';
+  }
 
   return (
     <main className="app-shell">
@@ -24,32 +54,34 @@ export default function Home() {
         <div className="brand"><div className="brand-mark">AB</div><span>ABEmail</span></div>
         <button className="compose" onClick={() => setComposerOpen(true)}><PenLine size={17} /> Compose</button>
         <nav>
-          {[['Inbox', Inbox], ['Sent', Send], ['Starred', Star], ['Trash', Trash2]].map(([name, Icon]) => (
-            <button key={String(name)} className={folder === name ? 'nav-item active' : 'nav-item'} onClick={() => setFolder(String(name))}>
-              <Icon size={17} /><span>{name}</span>{name === 'Inbox' && <b>2</b>}
+          {([['Inbox', Inbox], ['Sent', Send], ['Starred', Star], ['Trash', Trash2]] as const).map(([name, Icon]) => (
+            <button key={name} className={folder === name ? 'nav-item active' : 'nav-item'} onClick={() => setFolder(name)}>
+              <Icon size={17} /><span>{name}</span>{name === 'Inbox' && <b>{messages.filter((m) => m.direction === 'inbound').length || ''}</b>}
             </button>
           ))}
         </nav>
         <button className="nav-item settings"><Settings size={17} /><span>Settings</span></button>
-        <div className="account-card"><div className="avatar">AB</div><div><strong>Waste2Light</strong><span>info@waste2light.com</span></div></div>
+        <button className="account-card" onClick={logout}><div className="avatar">AB</div><div><strong>ABEmail</strong><span>Sign out</span></div><LogOut size={15} /></button>
       </aside>
 
       <section className="mail-panel">
         <header className="topbar">
-          <div><p className="eyebrow">{folder}</p><h1>{folder}</h1></div>
+          <div><p className="eyebrow">ABEmail Mail</p><h1>{folder}</h1></div>
           <label className="search"><Search size={17} /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search mail" /></label>
         </header>
         <div className="message-list">
-          {filtered.map((message) => (
-            <article key={message.id} className={message.unread ? 'message unread' : 'message'}>
-              <div className="message-avatar">{message.sender.slice(0, 2).toUpperCase()}</div>
-              <div className="message-main"><div className="message-head"><strong>{message.sender}</strong><span>{message.time}</span></div><div className="message-subject">{message.subject}</div><p>{message.preview}</p></div>
+          {loading && <div className="empty"><Mail size={32} /><strong>Loading mail…</strong></div>}
+          {!loading && filtered.map((message) => (
+            <article key={message.id} className="message" onClick={() => setSelected(message)}>
+              <div className="message-avatar">{message.from_address.slice(0, 2).toUpperCase()}</div>
+              <div className="message-main"><div className="message-head"><strong>{message.from_address}</strong><span>{new Date(message.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span></div><div className="message-subject">{message.subject}</div><p>{message.text_body || 'Open message to view content.'}</p></div>
             </article>
           ))}
-          {!filtered.length && <div className="empty"><Mail size={32} /><strong>No matching mail</strong><span>Try a different search term.</span></div>}
+          {!loading && !filtered.length && <div className="empty"><Mail size={32} /><strong>No mail here yet</strong><span>Messages received by Resend will appear here.</span></div>}
         </div>
       </section>
 
+      {selected && <div className="overlay" onClick={() => setSelected(null)}><article className="composer message-view" onClick={(event) => event.stopPropagation()}><div className="composer-head"><div><strong>{selected.subject}</strong><div className="message-meta">From {selected.from_address}</div></div><button type="button" onClick={() => setSelected(null)}>×</button></div><div className="message-content" dangerouslySetInnerHTML={{ __html: selected.html_body || `<p>${selected.text_body || ''}</p>` }} /></article></div>}
       {composerOpen && <Compose onClose={() => setComposerOpen(false)} />}
     </main>
   );
