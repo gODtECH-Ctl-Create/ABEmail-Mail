@@ -4,18 +4,20 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 export async function POST(request: Request) {
   try {
+    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
+    if (!webhookSecret) throw new Error('RESEND_WEBHOOK_SECRET is missing');
+
     const resend = getResend();
     const payload = await request.text();
-    const signature = {
-      id: request.headers.get('svix-id'),
-      timestamp: request.headers.get('svix-timestamp'),
-      signature: request.headers.get('svix-signature'),
-    };
+    const id = request.headers.get('svix-id');
+    const timestamp = request.headers.get('svix-timestamp');
+    const signature = request.headers.get('svix-signature');
+    if (!id || !timestamp || !signature) throw new Error('Missing webhook signature headers');
 
     const event = resend.webhooks.verify({
       payload,
-      headers: signature,
-      webhookSecret: process.env.RESEND_WEBHOOK_SECRET,
+      headers: { id, timestamp, signature },
+      webhookSecret,
     });
 
     if (event.type !== 'email.received') return NextResponse.json({ received: true });
