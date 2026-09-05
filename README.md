@@ -5,17 +5,17 @@ AB-branded business mail workspace for Waste2Light, powered by Resend and Supaba
 ## Current MVP
 
 - Supabase email/password authentication
-- Inbox and Sent views
+- Responsive Inbox and Sent views
 - Compose and send email through Resend
 - Authenticated send API
 - Verified Resend inbound webhook
 - Store inbound and outbound messages in Supabase
-- Basic message viewer
+- Responsive message reader and compose experience
 - Initial mailboxes for Waste2Light:
   - info@waste2light.com
   - support@waste2light.com
   - admin@waste2light.com
-  - emmanuel.aba@waste2light.com
+  - emmanuel.abah@waste2light.com
 
 ## Stack
 
