@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getResend, getFromAddress } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { getSupabaseServer } from '@/lib/supabase-server';
 
 export async function POST(request: Request) {
   try {
+    const authClient = await getSupabaseServer();
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+
     const body = await request.json();
     const to = typeof body.to === 'string' ? body.to.trim() : '';
     const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
@@ -34,6 +39,7 @@ export async function POST(request: Request) {
       subject,
       html_body: html,
       status: 'sent',
+      created_by: user.id,
     });
 
     return NextResponse.json({ id: data.id });
