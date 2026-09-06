@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getResend } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
+const normalizeAddresses = (addresses: string[] | null | undefined) =>
+  (addresses ?? []).map((address) => address.trim().toLowerCase()).filter(Boolean);
+
 export async function POST(request: Request) {
   try {
     const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
@@ -30,11 +33,11 @@ export async function POST(request: Request) {
       resend_email_id: email.id,
       message_id: email.message_id ?? null,
       direction: 'inbound',
-      from_address: email.from,
-      to_addresses: email.to ?? [],
-      cc_addresses: email.cc ?? [],
-      bcc_addresses: email.bcc ?? [],
-      reply_to: email.reply_to ?? [],
+      from_address: email.from.toLowerCase(),
+      to_addresses: normalizeAddresses(email.to),
+      cc_addresses: normalizeAddresses(email.cc),
+      bcc_addresses: normalizeAddresses(email.bcc),
+      reply_to: normalizeAddresses(email.reply_to),
       subject: email.subject ?? '(no subject)',
       html_body: email.html ?? null,
       text_body: email.text ?? null,
