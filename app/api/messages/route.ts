@@ -3,23 +3,40 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getSupabaseServer } from '@/lib/supabase-server';
 
 const MAIL_DOMAIN = 'waste2light.com';
+const MESSAGE_SELECT = 'id,is_read,is_starred,is_trashed';
+
+async function getAuthenticatedUser() {
+  const authClient = await getSupabaseServer();
+  const { data: { user } } = await authClient.auth.getUser();
+  const userEmail = user?.email?.toLowerCase();
+
+  if (!user?.id || !userEmail) {
+    return { error: NextResponse.json({ error: 'Authentication required.' }, { status: 401 }) };
+  }
+
+  if (!userEmail.endsWith(`@${MAIL_DOMAIN}`)) {
+    return {
+      error: NextResponse.json(
+        { error: 'Your account is not configured as a Waste2Light mailbox.' },
+        { status: 403 },
+      ),
+    };
+  }
+
+  return { user, userEmail };
+}
+
+function scopeMessageQuery(query: ReturnType<ReturnType<typeof getSupabaseAdmin>['from']>, userEmail: string) {
+  return query.or(`created_by.eq.${userEmail},from_address.eq.${userEmail},to_addresses.cs.{${userEmail}}`);
+}
 
 export async function PATCH(request: Request) {
   try {
-    const authClient = await getSupabaseServer();
-    const { data: { user } } = await authClient.auth.getUser();
-    const userEmail = user?.email?.toLowerCase();
-
-    if (!user?.id || !userEmail) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
-    }
-
-    if (!userEmail.endsWith(`@${MAIL_DOMAIN}`)) {
-      return NextResponse.json({ error: 'Your account is not configured as a Waste2Light mailbox.' }, { status: 403 });
-    }
+    const auth = await getAuthenticatedUser();
+    if ('error' in auth) return auth.error;
 
     const body = await request.json();
-    const id = typeof body.id === 'string' ? body.id : '';
+    const id = typeof body.id === 'string' ? body.id.trim() : '';
     const action = typeof body.action === 'string' ? body.action : '';
 
     if (!id) return NextResponse.json({ error: 'Message ID is required.' }, { status: 400 });
@@ -34,11 +51,11 @@ export async function PATCH(request: Request) {
     else return NextResponse.json({ error: 'Unsupported message action.' }, { status: 400 });
 
     const supabase = getSupabaseAdmin();
-    const { data: message, error: updateError } = await supabase
-      .from('email_messages')
-      .update(updates)
-      .eq('id', id)
-      .select('id,is_read,is_starred,is_trashed')
+    let query = supabase.from('email_messages').update(updates).eq('id', id);
+    query = scopeMessageQuery(query, auth.userEmail);
+
+    const { data: message, error: updateError } = await query
+      .select(MESSAGE_SELECT)
       .maybeSingle();
 
     if (updateError) throw updateError;
@@ -53,24 +70,18 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const authClient = await getSupabaseServer();
-    const { data: { user } } = await authClient.auth.getUser();
-    const userEmail = user?.email?.toLowerCase();
-
-    if (!user?.id || !userEmail) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
-    }
-
-    if (!userEmail.endsWith(`@${MAIL_DOMAIN}`)) {
-      return NextResponse.json({ error: 'Your account is not configured as a Waste2Light mailbox.' }, { status: 403 });
-    }
+    const auth = await getAuthenticatedUser();
+    if ('error' in auth) return auth.error;
 
     const url = new URL(request.url);
-    const id = url.searchParams.get('id');
+    const id = url.searchParams.get('id')?.trim();
     if (!id) return NextResponse.json({ error: 'Message ID is required.' }, { status: 400 });
 
     const supabase = getSupabaseAdmin();
-    const { error } = await supabase.from('email_messages').delete().eq('id', id);
+    let query = supabase.from('email_messages').delete().eq('id', id);
+    query = scopeMessageQuery(query, auth.userEmail);
+
+    const { error } = await query;
     if (error) throw error;
 
     return NextResponse.json({ deleted: true });
