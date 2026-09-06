@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getResend } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import { sendIncomingEmailPush } from '@/lib/send-push';
+
+export const runtime = 'nodejs';
 
 const normalizeAddresses = (addresses: string[] | null | undefined) =>
   (addresses ?? []).map((address) => address.trim().toLowerCase()).filter(Boolean);
@@ -29,12 +32,13 @@ export async function POST(request: Request) {
     if (error || !email) throw new Error(error?.message ?? 'Received email could not be retrieved');
 
     const supabase = getSupabaseAdmin();
+    const toAddresses = normalizeAddresses(email.to);
     const { error: dbError } = await supabase.from('email_messages').upsert({
       resend_email_id: email.id,
       message_id: email.message_id ?? null,
       direction: 'inbound',
       from_address: email.from.toLowerCase(),
-      to_addresses: normalizeAddresses(email.to),
+      to_addresses: toAddresses,
       cc_addresses: normalizeAddresses(email.cc),
       bcc_addresses: normalizeAddresses(email.bcc),
       reply_to: normalizeAddresses(email.reply_to),
@@ -51,6 +55,14 @@ export async function POST(request: Request) {
     }, { onConflict: 'resend_email_id' });
 
     if (dbError) throw dbError;
+
+    await sendIncomingEmailPush({
+      id: email.id,
+      from: email.from,
+      subject: email.subject ?? '(no subject)',
+      to: toAddresses,
+    });
+
     return NextResponse.json({ received: true });
   } catch (error) {
     console.error('resend webhook error', error);
