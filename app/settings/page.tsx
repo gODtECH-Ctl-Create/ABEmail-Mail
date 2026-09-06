@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft, Bell, Check, CircleUserRound, CreditCard, Mail, ShieldCheck } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { registerWebPush, unregisterWebPush } from '@/lib/push-client';
 import styles from './settings.module.css';
 
 type BillingCycle = 'monthly' | 'yearly';
@@ -56,6 +57,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState('');
   const [error, setError] = useState('');
+  const [pushStatus, setPushStatus] = useState<'unknown' | 'ready' | 'unsupported' | 'needs-home-screen'>('unknown');
 
   const isAdmin = email === 'admin@waste2light.com';
 
@@ -158,20 +160,53 @@ export default function SettingsPage() {
     await updateNotifications({ ...notifications, email_notifications: enabled });
   }
 
+  function isIos() {
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+  }
+
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
+  }
+
   async function setBrowserNotifications(enabled: boolean) {
-    if (enabled) {
-      if (!('Notification' in window)) {
-        saveNotice('Browser notifications are not supported here');
-        return;
-      }
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        saveNotice('Notification permission was not granted');
-        return;
-      }
+    if (!enabled) {
+      await unregisterWebPush();
+      await updateNotifications({ ...notifications, browser_notifications: false });
+      setPushStatus('unknown');
+      return;
     }
 
-    await updateNotifications({ ...notifications, browser_notifications: enabled });
+    if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+      setPushStatus('unsupported');
+      saveNotice('Web Push is not supported in this browser');
+      return;
+    }
+
+    if (isIos() && !isStandalone()) {
+      setPushStatus('needs-home-screen');
+      saveNotice('On iPhone, add ABEmail to your Home Screen first');
+      return;
+    }
+
+    const permission = Notification.permission === 'granted'
+      ? 'granted'
+      : await Notification.requestPermission();
+
+    if (permission !== 'granted') {
+      setPushStatus('unsupported');
+      saveNotice('Notification permission was not granted');
+      return;
+    }
+
+    const result = await registerWebPush();
+    if (!result.ok) {
+      setPushStatus('unsupported');
+      saveNotice(result.reason ?? 'Web Push could not be enabled');
+      return;
+    }
+
+    setPushStatus('ready');
+    await updateNotifications({ ...notifications, browser_notifications: true });
   }
 
   async function chooseBillingCycle(cycle: BillingCycle) {
@@ -258,7 +293,7 @@ export default function SettingsPage() {
             <div className={styles.sectionIcon}><Bell size={18} /></div>
             <div>
               <h2>Notifications</h2>
-              <p>These preferences are saved to your ABEmail account.</p>
+              <p>Preferences are saved to your account and push subscriptions are stored per device.</p>
             </div>
           </div>
           <ToggleRow
@@ -270,15 +305,29 @@ export default function SettingsPage() {
           />
           <ToggleRow
             title="Browser notifications"
-            description="Show a device notification when new mail arrives while ABEmail is open."
+            description="Receive new-mail notifications even when ABEmail is running in the background."
             checked={notifications.browser_notifications}
             disabled={saving || loading}
             onChange={setBrowserNotifications}
           />
-          <div className={styles.infoBox}>
-            <span>How it works</span>
-            <p>ABEmail checks for new inbox mail periodically and can show a native browser notification when permission is granted. Full background push delivery when the app is closed will be added later.</p>
-          </div>
+          {pushStatus === 'ready' && (
+            <div className={styles.infoBox}>
+              <span><Check size={15} /> Web Push is enabled on this device</span>
+              <p>New incoming email can now be delivered through the browser push service.</p>
+            </div>
+          )}
+          {pushStatus === 'needs-home-screen' && (
+            <div className={styles.infoBox}>
+              <span>iPhone setup</span>
+              <p>Add mail.waste2light.com to your Home Screen, open it from there, and enable Browser notifications again.</p>
+            </div>
+          )}
+          {pushStatus === 'unsupported' && (
+            <div className={styles.infoBox}>
+              <span>Web Push unavailable</span>
+              <p>The browser could not create a push subscription on this device. The in-app notification fallback remains available.</p>
+            </div>
+          )}
         </section>
 
         <section className={styles.card}>
