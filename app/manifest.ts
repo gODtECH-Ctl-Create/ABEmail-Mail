@@ -10,5 +10,13 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     background_color: '#f4f5f7',
     theme_color: '#111827',
+    icons: [
+      {
+        src: '/abemail-icon.svg',
+        sizes: '192x192',
+        type: 'image/svg+xml',
+        purpose: 'any maskable',
+      },
+    ],
   };
 }
