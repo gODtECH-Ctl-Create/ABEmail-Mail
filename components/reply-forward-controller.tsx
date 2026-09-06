@@ -43,10 +43,9 @@ function getSnapshot(): MailSnapshot | null {
   const subject = heading?.querySelector<HTMLElement>('h2')?.textContent?.trim() ?? '';
   const body = detail.querySelector<HTMLElement>('.message-content')?.innerText?.trim() ?? '';
   const date = heading?.querySelector<HTMLElement>('time')?.textContent?.trim() ?? '';
-  const account = document.querySelector<HTMLElement>('.account-copy strong')?.textContent?.trim().toLowerCase() ?? '';
 
   if (!sender || !subject) return null;
-  return { from: sender, to: recipients, subject, body, date: date || new Date().toLocaleString(), };
+  return { from: sender, to: recipients, subject, body, date: date || new Date().toLocaleString() };
 }
 
 function openDialog(snapshot: MailSnapshot, mode: 'reply-all' | 'forward') {
@@ -66,29 +65,32 @@ function openDialog(snapshot: MailSnapshot, mode: 'reply-all' | 'forward') {
   overlay.innerHTML = `
     <div class="abemail-rf-dialog" role="dialog" aria-modal="true" aria-labelledby="abemail-rf-title">
       <div class="abemail-rf-head">
-        <div><span class="eyebrow">ABEmail</span><strong id="abemail-rf-title">${mode === 'reply-all' ? 'Reply all' : 'Forward message'}</strong></div>
+        <div><span class="eyebrow">ABEmail</span><strong id="abemail-rf-title"></strong></div>
         <button type="button" class="icon-button abemail-rf-close" aria-label="Close">×</button>
       </div>
-      <label class="abemail-rf-field"><span>To</span><input class="abemail-rf-to" value="${recipients.join(', ')}" placeholder="recipient@example.com" /></label>
-      <label class="abemail-rf-field"><span>Subject</span><input class="abemail-rf-subject" value="${subject.replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" /></label>
+      <label class="abemail-rf-field"><span>To</span><input class="abemail-rf-to" placeholder="recipient@example.com" /></label>
+      <label class="abemail-rf-field"><span>Subject</span><input class="abemail-rf-subject" /></label>
       <label class="abemail-rf-field"><span>Message</span><textarea class="abemail-rf-body"></textarea></label>
       <div class="abemail-rf-status" aria-live="polite"></div>
       <div class="abemail-rf-actions"><button type="button" class="reply-button secondary abemail-rf-cancel">Cancel</button><button type="button" class="send-button abemail-rf-send">Send</button></div>
     </div>`;
   document.body.appendChild(overlay);
 
+  const title = overlay.querySelector<HTMLElement>('#abemail-rf-title');
+  const toField = overlay.querySelector<HTMLInputElement>('.abemail-rf-to');
+  const subjectField = overlay.querySelector<HTMLInputElement>('.abemail-rf-subject');
   const bodyField = overlay.querySelector<HTMLTextAreaElement>('.abemail-rf-body');
   const status = overlay.querySelector<HTMLElement>('.abemail-rf-status');
   const sendButton = overlay.querySelector<HTMLButtonElement>('.abemail-rf-send');
   const close = () => overlay.remove();
-  const closeButton = overlay.querySelector<HTMLButtonElement>('.abemail-rf-close');
-  const cancelButton = overlay.querySelector<HTMLButtonElement>('.abemail-rf-cancel');
-  const toField = overlay.querySelector<HTMLInputElement>('.abemail-rf-to');
-  const subjectField = overlay.querySelector<HTMLInputElement>('.abemail-rf-subject');
 
+  if (title) title.textContent = mode === 'reply-all' ? 'Reply all' : 'Forward message';
+  if (toField) toField.value = recipients.join(', ');
+  if (subjectField) subjectField.value = subject;
   if (bodyField) bodyField.value = body;
-  closeButton?.addEventListener('click', close);
-  cancelButton?.addEventListener('click', close);
+
+  overlay.querySelector<HTMLButtonElement>('.abemail-rf-close')?.addEventListener('click', close);
+  overlay.querySelector<HTMLButtonElement>('.abemail-rf-cancel')?.addEventListener('click', close);
   overlay.addEventListener('click', (event) => { if (event.target === overlay) close(); });
 
   sendButton?.addEventListener('click', async () => {
