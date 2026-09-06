@@ -66,15 +66,15 @@ export default function SettingsPage() {
       try {
         const supabase = getSupabaseBrowser();
         const { data: userData, error: userError } = await supabase.auth.getUser();
+        const authenticatedEmail = userData.user?.email?.toLowerCase();
 
-        if (userError || !userData.user?.email) {
+        if (userError || !authenticatedEmail || !userData.user) {
           window.location.href = '/login';
           return;
         }
 
         const user = userData.user;
-        const normalizedEmail = user.email.toLowerCase();
-        setEmail(normalizedEmail);
+        setEmail(authenticatedEmail);
         setUserId(user.id);
 
         const [{ data: preferences }, { data: billing, error: billingError }] = await Promise.all([
