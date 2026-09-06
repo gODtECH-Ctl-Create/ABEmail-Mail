@@ -7,7 +7,7 @@ const MAIL_DOMAIN = 'waste2light.com';
 const BUCKET = 'abemail-attachments';
 
 function isAllowedMessage(message: { direction: string; from_address: string; to_addresses: string[] }, userEmail: string) {
-  if (message.direction === 'outbound') return message.from_address.toLowerCase() === userEmail || message.from_address.toLowerCase().endsWith(`@${MAIL_DOMAIN}`);
+  if (message.direction === 'outbound') return message.from_address.toLowerCase().endsWith(`@${MAIL_DOMAIN}`);
   return message.to_addresses.some((address) => address.toLowerCase() === userEmail || address.toLowerCase().endsWith(`@${MAIL_DOMAIN}`));
 }
 
@@ -38,13 +38,9 @@ export async function GET(request: Request) {
         ? message.attachments.find((item: { id?: unknown; storage_path?: unknown }) => item?.id === attachmentId || item?.storage_path === attachmentId)
         : null;
       const storagePath = typeof attachment?.storage_path === 'string' ? attachment.storage_path : '';
-      if (!storagePath || !storagePath.endsWith('') || !storagePath.startsWith(`${message.created_by ?? user.id}/`)) {
-        // Storage paths created by ABEmail are scoped to the authenticated uploader.
-        // For older sent messages without created_by, fall back to the path prefix embedded in the attachment id.
-      }
-      const actualPath = storagePath || attachmentId;
-      if (!actualPath.startsWith(`${user.id}/`)) return NextResponse.json({ error: 'Attachment access denied.' }, { status: 403 });
-      const { data: signed, error: signedError } = await supabase.storage.from(BUCKET).createSignedUrl(actualPath, 300);
+      if (!storagePath) return NextResponse.json({ error: 'Attachment source unavailable.' }, { status: 404 });
+
+      const { data: signed, error: signedError } = await supabase.storage.from(BUCKET).createSignedUrl(storagePath, 300);
       if (signedError || !signed?.signedUrl) return NextResponse.json({ error: 'Unable to prepare attachment.' }, { status: 500 });
       return NextResponse.redirect(signed.signedUrl);
     }
