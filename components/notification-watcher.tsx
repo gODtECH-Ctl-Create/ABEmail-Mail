@@ -23,21 +23,11 @@ const NOTIFICATION_KEY_PREFIX = 'abemail:last-notified:';
 export default function NotificationWatcher() {
   const [alert, setAlert] = useState<{ id: string; title: string; body: string } | null>(null);
   const lastSeenAtRef = useRef<string | null>(null);
-  const initializedRef = useRef(false);
   const pollingRef = useRef(false);
-  const userEmailRef = useRef<string>('');
 
   useEffect(() => {
     let mounted = true;
     let intervalId: number | undefined;
-
-    async function getAuthenticatedEmail() {
-      const supabase = getSupabaseBrowser();
-      const { data } = await supabase.auth.getUser();
-      const email = data.user?.email?.toLowerCase() ?? '';
-      if (mounted) userEmailRef.current = email;
-      return email;
-    }
 
     async function readPreferences(userId: string) {
       const { data } = await getSupabaseBrowser()
@@ -59,41 +49,31 @@ export default function NotificationWatcher() {
         const email = user?.email?.toLowerCase();
         if (!user?.id || !email || !email.endsWith('@waste2light.com')) return;
 
-        userEmailRef.current = email;
         const browserEnabled = await readPreferences(user.id);
-
         const response = await fetch('/api/inbox?view=primary', { cache: 'no-store' });
         if (!response.ok) return;
+
         const payload = await response.json() as { messages?: Message[] };
         const messages = (payload.messages ?? [])
           .filter((message) => message.direction === 'inbound' && !message.is_trashed)
           .sort((a, b) => a.created_at.localeCompare(b.created_at));
 
-        if (!messages.length) {
-          if (!initializedRef.current) initializedRef.current = true;
-          return;
-        }
-
-        const newestAt = messages[messages.length - 1]?.created_at;
-        if (!newestAt) return;
+        const storageKey = `${NOTIFICATION_KEY_PREFIX}${email}`;
 
         if (lastSeenAtRef.current === null) {
-          const storageKey = `${NOTIFICATION_KEY_PREFIX}${email}`;
-          lastSeenAtRef.current = window.localStorage.getItem(storageKey) || newestAt;
-          if (!window.localStorage.getItem(storageKey)) {
-            window.localStorage.setItem(storageKey, newestAt);
-          }
-          initializedRef.current = true;
+          const stored = window.localStorage.getItem(storageKey);
+          lastSeenAtRef.current = stored || messages[messages.length - 1]?.created_at || new Date().toISOString();
+          if (!stored) window.localStorage.setItem(storageKey, lastSeenAtRef.current);
           return;
         }
 
         const newMessages = messages.filter((message) => message.created_at > (lastSeenAtRef.current ?? ''));
         if (!newMessages.length) return;
 
-        lastSeenAtRef.current = newestAt;
-        window.localStorage.setItem(`${NOTIFICATION_KEY_PREFIX}${email}`, newestAt);
-
         const newest = newMessages[newMessages.length - 1];
+        lastSeenAtRef.current = newest.created_at;
+        window.localStorage.setItem(storageKey, newest.created_at);
+
         const title = newMessages.length === 1 ? 'New email' : `${newMessages.length} new emails`;
         const body = newMessages.length === 1
           ? `${newest.from_address} · ${newest.subject || '(no subject)'}`
@@ -124,8 +104,9 @@ export default function NotificationWatcher() {
       }
     }
 
-    void getAuthenticatedEmail().then((email) => {
-      if (!email || !email.endsWith('@waste2light.com')) return;
+    void getSupabaseBrowser().auth.getUser().then(({ data }) => {
+      const email = data.user?.email?.toLowerCase() ?? '';
+      if (!email.endsWith('@waste2light.com')) return;
       void poll();
       intervalId = window.setInterval(() => void poll(), POLL_INTERVAL_MS);
     });
