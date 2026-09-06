@@ -47,9 +47,10 @@ export async function GET(request: Request) {
 
     if (!message.resend_email_id) return NextResponse.json({ error: 'Attachment source unavailable.' }, { status: 404 });
     const resend = getResend();
-    const { data: attachments, error: attachmentError } = await resend.emails.receiving.attachments.list({ emailId: message.resend_email_id });
+    const { data: attachmentResponse, error: attachmentError } = await resend.emails.receiving.attachments.list({ emailId: message.resend_email_id });
     if (attachmentError) throw attachmentError;
-    const attachment = (attachments ?? []).find((item: { id?: string }) => item.id === attachmentId);
+    const attachmentList = Array.isArray(attachmentResponse) ? attachmentResponse : attachmentResponse.data;
+    const attachment = attachmentList.find((item: { id?: string }) => item.id === attachmentId);
     if (!attachment) return NextResponse.json({ error: 'Attachment not found.' }, { status: 404 });
     if (!attachment.download_url) return NextResponse.json({ error: 'Attachment download is unavailable.' }, { status: 404 });
     return NextResponse.redirect(attachment.download_url);
