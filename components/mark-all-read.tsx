@@ -7,8 +7,8 @@ const SUPPORTED_VIEWS = new Set(['Primary', 'All Mail', 'Starred']);
 
 function getActiveView() {
   const active = Array.from(document.querySelectorAll<HTMLButtonElement>('.nav-item.active'))
-    .find((button) => SUPPORTED_VIEWS.has(button.textContent?.trim() ?? ''));
-  return active?.textContent?.trim() ?? '';
+    .find((button) => SUPPORTED_VIEWS.has(button.querySelector('span')?.textContent?.trim() ?? ''));
+  return active?.querySelector('span')?.textContent?.trim() ?? '';
 }
 
 function getMailboxFilter() {
