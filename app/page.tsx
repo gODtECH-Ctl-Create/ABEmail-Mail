@@ -3,7 +3,6 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
-  ChevronDown,
   Inbox,
   LogOut,
   Mail,
@@ -18,10 +17,11 @@ import {
   Trash2,
   X,
   Forward,
+  FileText,
 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 
-type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent';
+type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent' | 'drafts';
 
 type Mailbox = {
   id: string;
@@ -42,7 +42,22 @@ type Message = {
   status: string;
 };
 
+type Draft = {
+  id: string;
+  user_id: string;
+  from_address: string;
+  to_addresses: string[];
+  cc_addresses: string[];
+  bcc_addresses: string[];
+  subject: string;
+  html_body: string;
+  text_body: string;
+  created_at: string;
+  updated_at: string;
+};
+
 type ComposeSeed = {
+  draftId?: string;
   to?: string;
   subject?: string;
   body?: string;
@@ -69,6 +84,11 @@ const viewMeta: Record<ViewKey, { title: string; eyebrow: string; description: s
     eyebrow: 'Sent',
     description: 'Messages sent by any company mailbox.',
   },
+  drafts: {
+    title: 'Drafts',
+    eyebrow: 'Mail',
+    description: 'Messages you started and have not sent yet.',
+  },
 };
 
 export default function Home() {
@@ -78,6 +98,7 @@ export default function Home() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [drafts, setDrafts] = useState<Draft[]>([]);
   const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
   const [selected, setSelected] = useState<Message | null>(null);
   const [composeSeed, setComposeSeed] = useState<ComposeSeed>({});
@@ -99,6 +120,27 @@ export default function Home() {
 
         if (!email) {
           window.location.href = '/login';
+          return;
+        }
+
+        if (view === 'drafts') {
+          const response = await fetch('/api/drafts', { cache: 'no-store' });
+          const data = await response.json();
+
+          if (response.status === 401) {
+            window.location.href = '/login';
+            return;
+          }
+
+          if (!response.ok) {
+            throw new Error(data.error ?? 'Unable to load drafts.');
+          }
+
+          if (!mounted) return;
+          setCurrentUserEmail(email);
+          setDrafts(data.drafts ?? []);
+          setMessages([]);
+          setMailboxFilter('');
           return;
         }
 
@@ -150,7 +192,15 @@ export default function Home() {
     );
   }, [messages, query]);
 
-  const primaryCount = messages.filter((message) => message.direction === 'inbound').length;
+  const filteredDrafts = useMemo(() => {
+    const normalized = query.trim().toLowerCase();
+    if (!normalized) return drafts;
+    return drafts.filter((draft) =>
+      `${draft.to_addresses.join(' ')} ${draft.subject} ${draft.text_body}`.toLowerCase().includes(normalized),
+    );
+  }, [drafts, query]);
+
+  const primaryCount = view === 'primary' ? messages.filter((message) => message.direction === 'inbound').length : null;
   const meta = viewMeta[view];
   const hasMailboxFilter = view === 'all' || view === 'all-sent';
 
@@ -177,6 +227,15 @@ export default function Home() {
     setComposerOpen(true);
   }
 
+  function openDraft(draft: Draft) {
+    openCompose({
+      draftId: draft.id,
+      to: draft.to_addresses.join(', '),
+      subject: draft.subject,
+      body: draft.text_body,
+    });
+  }
+
   async function logout() {
     await getSupabaseBrowser().auth.signOut();
     window.location.href = '/login';
@@ -191,6 +250,9 @@ export default function Home() {
         active: true,
       })
     : 'All mailboxes';
+
+  const listCount = view === 'drafts' ? filteredDrafts.length : filtered.length;
+  const noContent = view === 'drafts' ? filteredDrafts.length === 0 : filtered.length === 0;
 
   return (
     <main className={`app-shell ${mobileNavOpen ? 'nav-open' : ''} ${selected ? 'detail-open' : ''}`}>
@@ -217,43 +279,32 @@ export default function Home() {
 
         <nav className="folder-nav" aria-label="Mail folders">
           <div className="nav-section-label">Inbox</div>
-          <button
-            type="button"
-            className={`nav-item nav-subitem ${view === 'primary' ? 'active' : ''}`}
-            onClick={() => chooseView('primary')}
-          >
+          <button type="button" className={`nav-item nav-subitem ${view === 'primary' ? 'active' : ''}`} onClick={() => chooseView('primary')}>
             <Inbox size={16} />
             <span>Primary</span>
             {view === 'primary' && <b>{primaryCount || ''}</b>}
           </button>
-          <button
-            type="button"
-            className={`nav-item nav-subitem ${view === 'all' ? 'active' : ''}`}
-            onClick={() => chooseView('all')}
-          >
+          <button type="button" className={`nav-item nav-subitem ${view === 'all' ? 'active' : ''}`} onClick={() => chooseView('all')}>
             <Mail size={16} />
             <span>All Mail</span>
           </button>
 
           <div className="nav-section-label">Sent</div>
-          <button
-            type="button"
-            className={`nav-item nav-subitem ${view === 'my-sent' ? 'active' : ''}`}
-            onClick={() => chooseView('my-sent')}
-          >
+          <button type="button" className={`nav-item nav-subitem ${view === 'my-sent' ? 'active' : ''}`} onClick={() => chooseView('my-sent')}>
             <Send size={16} />
             <span>My Sent</span>
           </button>
-          <button
-            type="button"
-            className={`nav-item nav-subitem ${view === 'all-sent' ? 'active' : ''}`}
-            onClick={() => chooseView('all-sent')}
-          >
+          <button type="button" className={`nav-item nav-subitem ${view === 'all-sent' ? 'active' : ''}`} onClick={() => chooseView('all-sent')}>
             <Send size={16} />
             <span>All Sent</span>
           </button>
 
-          <div className="nav-section-label nav-section-label-muted">More</div>
+          <div className="nav-section-label">More</div>
+          <button type="button" className={`nav-item nav-subitem ${view === 'drafts' ? 'active' : ''}`} onClick={() => chooseView('drafts')}>
+            <FileText size={16} />
+            <span>Drafts</span>
+            {drafts.length > 0 && <b>{drafts.length}</b>}
+          </button>
           <button type="button" className="nav-item disabled" disabled>
             <Star size={16} />
             <span>Starred</span>
@@ -303,7 +354,7 @@ export default function Home() {
         <div className="mail-content">
           <div className={`message-list ${selected ? 'hide-on-mobile' : ''}`}>
             <div className="list-toolbar">
-              <span>{loading ? 'Loading' : `${filtered.length} ${filtered.length === 1 ? 'message' : 'messages'}`}</span>
+              <span>{loading ? 'Loading' : `${listCount} ${listCount === 1 ? 'message' : 'messages'}`}</span>
               <MoreHorizontal size={18} aria-hidden="true" />
             </div>
 
@@ -345,7 +396,35 @@ export default function Home() {
               </div>
             )}
 
-            {!loading && !error && filtered.map((message) => {
+            {!loading && !error && view === 'drafts' && filteredDrafts.map((draft) => {
+              const recipient = draft.to_addresses[0] || 'No recipient';
+              const preview = draft.text_body?.replace(/\s+/g, ' ').trim() || 'Empty draft';
+              return (
+                <article
+                  key={draft.id}
+                  className="message-row draft-row"
+                  onClick={() => openDraft(draft)}
+                  tabIndex={0}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') openDraft(draft);
+                  }}
+                  role="button"
+                  aria-label={`Open draft ${draft.subject || 'Untitled'}`}
+                >
+                  <div className="message-avatar">{initials(recipient)}</div>
+                  <div className="message-main">
+                    <div className="message-head">
+                      <strong>{draft.subject || '(no subject)'}</strong>
+                      <span>{formatDate(draft.updated_at)}</span>
+                    </div>
+                    <div className="message-subject draft-tag">Draft · {recipient}</div>
+                    <p>{preview}</p>
+                  </div>
+                </article>
+              );
+            })}
+
+            {!loading && !error && view !== 'drafts' && filtered.map((message) => {
               const otherParty = message.direction === 'outbound' ? message.to_addresses[0] ?? 'Recipient' : message.from_address;
               const recipientText = message.direction === 'inbound'
                 ? `to ${message.to_addresses.length > 1 ? `${message.to_addresses.length} mailboxes` : message.to_addresses[0] ?? 'your mailbox'}`
@@ -377,7 +456,7 @@ export default function Home() {
               );
             })}
 
-            {!loading && !error && !filtered.length && (
+            {!loading && !error && noContent && (
               <div className="empty-state">
                 <div className="empty-icon"><Mail size={25} /></div>
                 <strong>{query ? 'No messages match your search' : `${meta.title} is empty`}</strong>
@@ -386,11 +465,13 @@ export default function Home() {
                     ? 'Try a different sender, subject, or keyword.'
                     : view === 'primary'
                       ? `Messages sent to ${currentUserEmail} will appear here.`
-                      : hasMailboxFilter
-                        ? `No messages for ${activeMailboxLabel.toLowerCase()}.`
-                        : 'Messages for your company mailboxes will appear here.'}
+                      : view === 'drafts'
+                        ? 'Drafts you start composing will appear here automatically.'
+                        : hasMailboxFilter
+                          ? `No messages for ${activeMailboxLabel.toLowerCase()}.`
+                          : 'Messages for your company mailboxes will appear here.'}
                 </span>
-                {!query && (view === 'primary' || view === 'my-sent') && (
+                {!query && (view === 'primary' || view === 'my-sent' || view === 'drafts') && (
                   <button type="button" className="ghost-action" onClick={() => openCompose()}>Compose a message</button>
                 )}
               </div>
@@ -455,6 +536,9 @@ export default function Home() {
             setComposerOpen(false);
             setComposeSeed({});
           }}
+          onDraftDeleted={() => {
+            setDrafts((current) => current.filter((draft) => draft.id !== composeSeed.draftId));
+          }}
           onSent={() => {
             setComposerOpen(false);
             setComposeSeed({});
@@ -466,26 +550,143 @@ export default function Home() {
   );
 }
 
-function Compose({ seed, onClose, onSent }: { seed: ComposeSeed; onClose: () => void; onSent: () => void }) {
+function Compose({
+  seed,
+  onClose,
+  onDraftDeleted,
+  onSent,
+}: {
+  seed: ComposeSeed;
+  onClose: () => void;
+  onDraftDeleted: () => void;
+  onSent: () => void;
+}) {
+  const [to, setTo] = useState(seed.to ?? '');
+  const [subject, setSubject] = useState(seed.subject ?? '');
+  const [body, setBody] = useState(seed.body ?? '');
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
+  const [draftId, setDraftId] = useState(seed.draftId ?? '');
+  const [saveTimer, setSaveTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    setTo(seed.to ?? '');
+    setSubject(seed.subject ?? '');
+    setBody(seed.body ?? '');
+    setDraftId(seed.draftId ?? '');
+    setStatus('');
+  }, [seed.draftId, seed.to, seed.subject, seed.body]);
+
+  useEffect(() => {
+    const hasContent = to.trim() || subject.trim() || body.trim();
+    if (!hasContent || busy) return;
+
+    if (saveTimer) clearTimeout(saveTimer);
+    const timer = setTimeout(async () => {
+      await saveDraft();
+    }, 700);
+    setSaveTimer(timer);
+
+    return () => clearTimeout(timer);
+    // saveDraft intentionally omitted to avoid recreating the debounce callback on each keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [to, subject, body, busy]);
+
+  async function saveDraft() {
+    if (busy || (!to.trim() && !subject.trim() && !body.trim())) return;
+    setStatus('Saving…');
+
+    try {
+      const payload = {
+        to_addresses: splitAddresses(to),
+        cc_addresses: [],
+        bcc_addresses: [],
+        subject,
+        html_body: toHtml(body),
+        text_body: body,
+      };
+
+      const response = draftId
+        ? await fetch('/api/drafts', {
+            method: 'PATCH',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ id: draftId, ...payload }),
+          })
+        : await fetch('/api/drafts', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+      const data = await response.json();
+      if (!response.ok) {
+        setStatus('Draft save failed');
+        return;
+      }
+
+      if (!draftId && data.draft?.id) setDraftId(data.draft.id);
+      setStatus('Saved');
+    } catch (error) {
+      console.error(error);
+      setStatus('Draft save failed');
+    }
+  }
+
+  async function closeComposer() {
+    if (busy) return;
+    if (to.trim() || subject.trim() || body.trim()) {
+      if (saveTimer) clearTimeout(saveTimer);
+      await saveDraft();
+    }
+    onClose();
+  }
+
+  async function deleteDraft() {
+    if (!draftId || busy) {
+      onClose();
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const response = await fetch(`/api/drafts?id=${encodeURIComponent(draftId)}`, { method: 'DELETE' });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        setStatus(data.error ?? 'Unable to delete draft.');
+        setBusy(false);
+        return;
+      }
+      onDraftDeleted();
+      onClose();
+    } catch (error) {
+      console.error(error);
+      setStatus('Unable to delete draft.');
+      setBusy(false);
+    }
+  }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (busy) return;
-    const form = new FormData(event.currentTarget);
+
+    if (!to.trim() || !subject.trim() || !body.trim()) {
+      setStatus('To, subject and message are required.');
+      return;
+    }
+
+    if (saveTimer) clearTimeout(saveTimer);
     setBusy(true);
-    setStatus('');
+    setStatus('Sending…');
 
     try {
-      const body = String(form.get('body') || '');
       const response = await fetch('/api/send', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({
-          to: form.get('to'),
-          subject: form.get('subject'),
-          html: body.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br />'),
+          to: splitAddresses(to)[0] ?? to.trim(),
+          subject: subject.trim(),
+          html: toHtml(body),
+          draftId: draftId || undefined,
         }),
       });
       const data = await response.json();
@@ -509,22 +710,39 @@ function Compose({ seed, onClose, onSent }: { seed: ComposeSeed; onClose: () => 
         <div className="composer-head">
           <div>
             <span className="eyebrow">ABEmail</span>
-            <strong>New message</strong>
+            <strong>{draftId ? 'Edit draft' : 'New message'}</strong>
           </div>
-          <button className="icon-button" type="button" onClick={onClose} aria-label="Close composer"><X size={18} /></button>
+          <button className="icon-button" type="button" onClick={closeComposer} aria-label="Close composer" disabled={busy}><X size={18} /></button>
         </div>
-        <input name="to" type="email" placeholder="To" defaultValue={seed.to} required autoFocus />
-        <input name="subject" placeholder="Subject" defaultValue={seed.subject} required />
-        <textarea name="body" placeholder="Write your message…" defaultValue={seed.body} required />
+        <input name="to" type="text" placeholder="To" value={to} onChange={(event) => setTo(event.target.value)} />
+        <input name="subject" placeholder="Subject" value={subject} onChange={(event) => setSubject(event.target.value)} />
+        <textarea name="body" placeholder="Write your message…" value={body} onChange={(event) => setBody(event.target.value)} />
         <div className="composer-foot">
-          <span className={status === 'Message sent' ? 'success' : 'status-text'}>{status}</span>
-          <button className="send-button" type="submit" disabled={busy}>
-            {busy ? 'Sending…' : 'Send'} <Send size={15} />
-          </button>
+          <div className="composer-status">
+            <span className={status === 'Saved' || status === 'Message sent' ? 'success' : 'status-text'}>{status}</span>
+            {draftId && status === 'Saved' && <small>Draft saved</small>}
+          </div>
+          <div className="composer-actions">
+            {draftId && <button className="delete-draft-button" type="button" onClick={deleteDraft} disabled={busy}>Delete draft</button>}
+            <button className="send-button" type="submit" disabled={busy}>
+              {busy ? 'Sending…' : 'Send'} <Send size={15} />
+            </button>
+          </div>
         </div>
       </form>
     </div>
   );
+}
+
+function splitAddresses(value: string) {
+  return value
+    .split(/[\n,;]+/)
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function toHtml(value: string) {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br />');
 }
 
 function initials(value: string) {
