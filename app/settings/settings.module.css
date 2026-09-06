@@ -54,18 +54,28 @@
   line-height: 1.5;
 }
 
-.notice {
+.notice,
+.errorNotice {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   margin-bottom: 14px;
   padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.notice {
   background: #fff;
   border: 1px solid #dfe2e6;
-  border-radius: 9px;
   color: #267447;
-  font-size: 12px;
   box-shadow: 0 8px 30px rgba(0,0,0,.04);
+}
+
+.errorNotice {
+  background: #fff4f4;
+  border: 1px solid #f0d0d0;
+  color: #a12d2d;
 }
 
 .card {
@@ -204,7 +214,7 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  transition: background .15s ease;
+  transition: background .15s ease, opacity .15s ease;
 }
 
 .toggle span {
@@ -219,6 +229,11 @@
 .toggleOn {
   background: #15171a;
   justify-content: flex-end;
+}
+
+.toggle:disabled {
+  opacity: .55;
+  cursor: wait;
 }
 
 .infoBox {
@@ -309,12 +324,18 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 12px;
+  transition: border-color .15s ease, background .15s ease, opacity .15s ease;
 }
 
-.cycleCard:hover,
+.cycleCard:hover:not(:disabled),
 .selected {
   border-color: #bfc4cb;
   background: #fafbfc;
+}
+
+.cycleCard:disabled {
+  cursor: default;
+  opacity: .9;
 }
 
 .cycleCard strong {
