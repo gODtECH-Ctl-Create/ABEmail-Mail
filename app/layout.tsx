@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './responsive-fix.css';
+import './mail-view.css';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
