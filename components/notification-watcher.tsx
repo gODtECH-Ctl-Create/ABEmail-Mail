@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { hasWebPushSubscription } from '@/lib/push-client';
 
 type NotificationPreferences = {
   browser_notifications: boolean;
@@ -79,12 +80,13 @@ export default function NotificationWatcher() {
           ? `${newest.from_address} · ${newest.subject || '(no subject)'}`
           : `New messages are waiting in your inbox for ${email}.`;
 
-        if (mounted) {
+        if (mounted && document.visibilityState === 'visible') {
           setAlert({ id: newest.id, title, body });
           window.setTimeout(() => setAlert(null), 6500);
         }
 
-        if (browserEnabled && 'Notification' in window && Notification.permission === 'granted') {
+        const pushSubscribed = browserEnabled && await hasWebPushSubscription();
+        if (!pushSubscribed && browserEnabled && 'Notification' in window && Notification.permission === 'granted' && document.visibilityState === 'visible') {
           const notification = new Notification(title, {
             body,
             tag: `abemail-${newest.id}`,
