@@ -270,14 +270,14 @@ export default function SettingsPage() {
           />
           <ToggleRow
             title="Browser notifications"
-            description="Allow ABEmail to show notifications on this device."
+            description="Show a device notification when new mail arrives while ABEmail is open."
             checked={notifications.browser_notifications}
             disabled={saving || loading}
             onChange={setBrowserNotifications}
           />
           <div className={styles.infoBox}>
-            <span>Note</span>
-            <p>Browser permission is enabled here. Background push delivery will be connected when ABEmail’s Web Push service is added.</p>
+            <span>How it works</span>
+            <p>ABEmail checks for new inbox mail periodically and can show a native browser notification when permission is granted. Full background push delivery when the app is closed will be added later.</p>
           </div>
         </section>
 
