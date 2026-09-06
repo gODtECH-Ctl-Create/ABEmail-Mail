@@ -1,0 +1,1 @@
+Monitoring and incident design for Waste2Light ABEmail is documented separately. The implementation should start with structured application events and correlation IDs, then incident detection and user issue reporting, followed by the ABE Tech Lab operations console.
