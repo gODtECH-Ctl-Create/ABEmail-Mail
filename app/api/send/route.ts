@@ -17,10 +17,10 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const to = typeof body.to === 'string' ? body.to.trim() : '';
+    const to = typeof body.to === 'string' ? body.to.trim().toLowerCase() : '';
     const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
     const html = typeof body.html === 'string' ? body.html : '';
-    const replyTo = typeof body.replyTo === 'string' ? body.replyTo.trim() : undefined;
+    const replyTo = typeof body.replyTo === 'string' ? body.replyTo.trim().toLowerCase() : undefined;
     const draftId = typeof body.draftId === 'string' ? body.draftId : '';
 
     if (!to || !subject || !html) {
@@ -50,6 +50,9 @@ export async function POST(request: Request) {
       html_body: html,
       status: 'sent',
       created_by: user.id,
+      is_read: true,
+      is_starred: false,
+      is_trashed: false,
     });
 
     if (insertError) console.error('failed to save sent message', insertError);
