@@ -152,7 +152,7 @@ export default function Home() {
           <span>Compose</span>
         </button>
 
-        <nav className="folder-nav">
+        <nav className="folder-nav" aria-label="Mail folders">
           {folders.map(({ name, icon: Icon, inactive }) => (
             <button
               key={name}
@@ -259,18 +259,22 @@ export default function Home() {
             )}
           </div>
 
-          {selected && (
-            <section className="message-detail" aria-label="Email message">
-              <div className="detail-toolbar">
+          <section className="message-detail" aria-label="Email reading pane">
+            <div className="detail-toolbar">
+              {selected ? (
                 <button className="icon-button mobile-back" type="button" onClick={() => setSelected(null)} aria-label="Back to message list">
                   <ArrowLeft size={19} />
                 </button>
-                <div className="detail-actions">
-                  <button className="icon-button" type="button" aria-label="Star message"><Star size={17} /></button>
-                  <button className="icon-button" type="button" aria-label="More message actions"><MoreHorizontal size={18} /></button>
-                </div>
+              ) : (
+                <span />
+              )}
+              <div className="detail-actions">
+                <button className="icon-button" type="button" aria-label="Star message" disabled={!selected}><Star size={17} /></button>
+                <button className="icon-button" type="button" aria-label="More message actions" disabled={!selected}><MoreHorizontal size={18} /></button>
               </div>
+            </div>
 
+            {selected ? (
               <div className="detail-scroll">
                 <div className="detail-heading">
                   <h2>{selected.subject || '(no subject)'}</h2>
@@ -295,8 +299,14 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-            </section>
-          )}
+            ) : (
+              <div className="detail-empty">
+                <div className="empty-icon"><Mail size={26} /></div>
+                <strong>Select a message</strong>
+                <span>Choose an email from the list to read it here.</span>
+              </div>
+            )}
+          </section>
         </div>
       </section>
 
@@ -398,5 +408,5 @@ function replySubject(subject: string) {
 }
 
 function escapeHtml(value: string) {
-  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;');
 }
