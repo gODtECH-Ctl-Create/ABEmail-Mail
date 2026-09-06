@@ -3,6 +3,7 @@ import './globals.css';
 import './responsive-fix.css';
 import './mail-view.css';
 import NotificationWatcher from '@/components/notification-watcher';
+import SearchNavigator from '@/components/search-navigator';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
@@ -15,6 +16,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <NotificationWatcher />
+        <SearchNavigator />
       </body>
     </html>
   );
