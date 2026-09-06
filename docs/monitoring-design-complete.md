@@ -1,0 +1,1 @@
+Complete operations design covers application/API health, email send/receive, webhook integrity, Supabase, authentication, attachments/storage, Web Push, DNS/email authentication, deployments, capacity, security, incidents, user reporting, alerts, and recovery workflow.
