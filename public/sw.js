@@ -13,8 +13,8 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: data.icon || '/favicon.ico',
-      badge: data.badge || '/favicon.ico',
+      icon: data.icon || '/abemail-icon.svg',
+      badge: data.badge || '/abemail-icon.svg',
       tag: data.tag || 'abemail-mail',
       renotify: true,
       data: { url },
@@ -30,9 +30,12 @@ self.addEventListener('notificationclick', (event) => {
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       const sameOriginClient = clients.find((client) => client.url.startsWith(self.location.origin));
       if (sameOriginClient) {
-        sameOriginClient.focus();
-        if ('navigate' in sameOriginClient) return sameOriginClient.navigate(targetUrl);
-        return undefined;
+        return sameOriginClient.focus().then(() => {
+          if ('navigate' in sameOriginClient && sameOriginClient.url !== `${self.location.origin}${targetUrl}`) {
+            return sameOriginClient.navigate(targetUrl);
+          }
+          return undefined;
+        });
       }
       return self.clients.openWindow(targetUrl);
     }),
