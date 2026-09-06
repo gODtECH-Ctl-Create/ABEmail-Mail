@@ -265,7 +265,7 @@ export default function Home() {
         </nav>
 
         <div className="sidebar-bottom">
-          <button className="nav-item" type="button">
+          <button className="nav-item" type="button" onClick={() => { window.location.href = '/settings'; }}>
             <Settings size={17} />
             <span>Settings</span>
           </button>
