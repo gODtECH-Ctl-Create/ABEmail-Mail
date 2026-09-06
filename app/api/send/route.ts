@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
     const html = typeof body.html === 'string' ? body.html : '';
     const replyTo = typeof body.replyTo === 'string' ? body.replyTo.trim() : undefined;
+    const draftId = typeof body.draftId === 'string' ? body.draftId : '';
 
     if (!to || !subject || !html) {
       return NextResponse.json({ error: 'To, subject and message are required.' }, { status: 400 });
@@ -52,6 +53,16 @@ export async function POST(request: Request) {
     });
 
     if (insertError) console.error('failed to save sent message', insertError);
+
+    if (draftId) {
+      const { error: draftDeleteError } = await supabase
+        .from('email_drafts')
+        .delete()
+        .eq('id', draftId)
+        .eq('user_id', user.id);
+      if (draftDeleteError) console.error('failed to delete sent draft', draftDeleteError);
+    }
+
     return NextResponse.json({ id: data.id });
   } catch (error) {
     console.error('send email error', error);
