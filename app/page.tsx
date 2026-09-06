@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
+  ChevronDown,
   Inbox,
   LogOut,
   Mail,
@@ -19,6 +20,15 @@ import {
   Forward,
 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+
+type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent';
+
+type Mailbox = {
+  id: string;
+  address: string;
+  display_name: string | null;
+  active: boolean;
+};
 
 type Message = {
   id: string;
@@ -38,84 +48,127 @@ type ComposeSeed = {
   body?: string;
 };
 
-const folders = [
-  { name: 'Inbox', icon: Inbox },
-  { name: 'Sent', icon: Send },
-  { name: 'Starred', icon: Star, inactive: true },
-  { name: 'Trash', icon: Trash2, inactive: true },
-];
+const viewMeta: Record<ViewKey, { title: string; eyebrow: string; description: string }> = {
+  primary: {
+    title: 'Primary',
+    eyebrow: 'Inbox',
+    description: 'Messages addressed to your mailbox.',
+  },
+  all: {
+    title: 'All Mail',
+    eyebrow: 'Inbox',
+    description: 'Messages addressed to any company mailbox.',
+  },
+  'my-sent': {
+    title: 'My Sent',
+    eyebrow: 'Sent',
+    description: 'Messages sent from your mailbox.',
+  },
+  'all-sent': {
+    title: 'All Sent',
+    eyebrow: 'Sent',
+    description: 'Messages sent by any company mailbox.',
+  },
+};
 
 export default function Home() {
-  const [folder, setFolder] = useState('Inbox');
+  const [view, setView] = useState<ViewKey>('primary');
+  const [mailboxFilter, setMailboxFilter] = useState('');
   const [composerOpen, setComposerOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
+  const [mailboxes, setMailboxes] = useState<Mailbox[]>([]);
   const [selected, setSelected] = useState<Message | null>(null);
   const [composeSeed, setComposeSeed] = useState<ComposeSeed>({});
   const [loading, setLoading] = useState(true);
   const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      const supabase = getSupabaseBrowser();
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user?.email) {
-        window.location.href = '/login';
-        return;
-      }
-      if (mounted) setCurrentUserEmail(userData.user.email);
+      setLoading(true);
+      setError('');
 
-      const response = await fetch('/api/inbox');
-      if (response.status === 401) {
-        window.location.href = '/login';
-        return;
+      try {
+        const supabase = getSupabaseBrowser();
+        const { data: userData } = await supabase.auth.getUser();
+        const email = userData.user?.email?.toLowerCase();
+
+        if (!email) {
+          window.location.href = '/login';
+          return;
+        }
+
+        const params = new URLSearchParams({ view });
+        if (mailboxFilter && (view === 'all' || view === 'all-sent')) {
+          params.set('mailbox', mailboxFilter);
+        }
+
+        const response = await fetch(`/api/inbox?${params.toString()}`, { cache: 'no-store' });
+        const data = await response.json();
+
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+
+        if (!response.ok) {
+          throw new Error(data.error ?? 'Unable to load mailbox.');
+        }
+
+        if (!mounted) return;
+        setCurrentUserEmail(email);
+        setMessages(data.messages ?? []);
+        setMailboxes(data.mailboxes ?? []);
+      } catch (loadError) {
+        console.error(loadError);
+        if (mounted) setError('Unable to load this mailbox right now.');
+      } finally {
+        if (mounted) setLoading(false);
       }
-      const data = await response.json();
-      if (mounted) setMessages(data.messages ?? []);
-      if (mounted) setLoading(false);
     }
 
-    load().catch((error) => {
-      console.error(error);
-      if (mounted) setLoading(false);
-    });
+    load();
+    setSelected(null);
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [view, mailboxFilter]);
 
   const filtered = useMemo(() => {
-    const folderMessages = messages.filter((message) => {
-      if (folder === 'Inbox') return message.direction === 'inbound';
-      if (folder === 'Sent') return message.direction === 'outbound';
-      return false;
-    });
-
     const normalized = query.trim().toLowerCase();
-    if (!normalized) return folderMessages;
+    if (!normalized) return messages;
 
-    return folderMessages.filter((message) =>
+    return messages.filter((message) =>
       `${message.from_address} ${message.to_addresses.join(' ')} ${message.subject} ${message.text_body ?? ''}`
         .toLowerCase()
         .includes(normalized),
     );
-  }, [folder, messages, query]);
+  }, [messages, query]);
 
-  const inboxCount = messages.filter((message) => message.direction === 'inbound').length;
+  const primaryCount = messages.filter((message) => message.direction === 'inbound').length;
+  const meta = viewMeta[view];
+  const hasMailboxFilter = view === 'all' || view === 'all-sent';
+
+  function chooseView(nextView: ViewKey) {
+    setView(nextView);
+    setMailboxFilter('');
+    setSelected(null);
+    setMobileNavOpen(false);
+    setQuery('');
+  }
+
+  function chooseMailbox(address: string) {
+    setMailboxFilter(address === mailboxFilter ? '' : address);
+    setSelected(null);
+  }
 
   function openMessage(message: Message) {
     setSelected(message);
-    setMobileNavOpen(false);
-  }
-
-  function chooseFolder(name: string) {
-    if (name === 'Starred' || name === 'Trash') return;
-    setFolder(name);
-    setSelected(null);
     setMobileNavOpen(false);
   }
 
@@ -128,6 +181,16 @@ export default function Home() {
     await getSupabaseBrowser().auth.signOut();
     window.location.href = '/login';
   }
+
+  const mailboxLabel = (mailbox: Mailbox) => mailbox.display_name || mailbox.address.split('@')[0];
+  const activeMailboxLabel = mailboxFilter
+    ? mailboxLabel(mailboxes.find((mailbox) => mailbox.address.toLowerCase() === mailboxFilter) ?? {
+        id: '',
+        address: mailboxFilter,
+        display_name: null,
+        active: true,
+      })
+    : 'All mailboxes';
 
   return (
     <main className={`app-shell ${mobileNavOpen ? 'nav-open' : ''} ${selected ? 'detail-open' : ''}`}>
@@ -153,20 +216,52 @@ export default function Home() {
         </button>
 
         <nav className="folder-nav" aria-label="Mail folders">
-          {folders.map(({ name, icon: Icon, inactive }) => (
-            <button
-              key={name}
-              type="button"
-              className={`nav-item ${folder === name ? 'active' : ''} ${inactive ? 'disabled' : ''}`}
-              onClick={() => chooseFolder(name)}
-              disabled={inactive}
-              title={inactive ? `${name} is not available yet` : undefined}
-            >
-              <Icon size={17} />
-              <span>{name}</span>
-              {name === 'Inbox' && <b>{inboxCount || ''}</b>}
-            </button>
-          ))}
+          <div className="nav-section-label">Inbox</div>
+          <button
+            type="button"
+            className={`nav-item nav-subitem ${view === 'primary' ? 'active' : ''}`}
+            onClick={() => chooseView('primary')}
+          >
+            <Inbox size={16} />
+            <span>Primary</span>
+            {view === 'primary' && <b>{primaryCount || ''}</b>}
+          </button>
+          <button
+            type="button"
+            className={`nav-item nav-subitem ${view === 'all' ? 'active' : ''}`}
+            onClick={() => chooseView('all')}
+          >
+            <Mail size={16} />
+            <span>All Mail</span>
+          </button>
+
+          <div className="nav-section-label">Sent</div>
+          <button
+            type="button"
+            className={`nav-item nav-subitem ${view === 'my-sent' ? 'active' : ''}`}
+            onClick={() => chooseView('my-sent')}
+          >
+            <Send size={16} />
+            <span>My Sent</span>
+          </button>
+          <button
+            type="button"
+            className={`nav-item nav-subitem ${view === 'all-sent' ? 'active' : ''}`}
+            onClick={() => chooseView('all-sent')}
+          >
+            <Send size={16} />
+            <span>All Sent</span>
+          </button>
+
+          <div className="nav-section-label nav-section-label-muted">More</div>
+          <button type="button" className="nav-item disabled" disabled>
+            <Star size={16} />
+            <span>Starred</span>
+          </button>
+          <button type="button" className="nav-item disabled" disabled>
+            <Trash2 size={16} />
+            <span>Trash</span>
+          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -192,8 +287,9 @@ export default function Home() {
               <Menu size={20} />
             </button>
             <div>
-              <p className="eyebrow">ABEmail</p>
-              <h1>{folder}</h1>
+              <p className="eyebrow">{meta.eyebrow}</p>
+              <h1>{meta.title}</h1>
+              <span className="view-description">{meta.description}</span>
             </div>
           </div>
 
@@ -208,10 +304,30 @@ export default function Home() {
           <div className={`message-list ${selected ? 'hide-on-mobile' : ''}`}>
             <div className="list-toolbar">
               <span>{loading ? 'Loading' : `${filtered.length} ${filtered.length === 1 ? 'message' : 'messages'}`}</span>
-              <button className="icon-button" type="button" aria-label="More inbox actions">
-                <MoreHorizontal size={18} />
-              </button>
+              <MoreHorizontal size={18} aria-hidden="true" />
             </div>
+
+            {hasMailboxFilter && !loading && (
+              <div className="mailbox-filter-bar" aria-label="Filter by mailbox">
+                <span className="mailbox-filter-label">Mailbox</span>
+                <div className="mailbox-filter-scroll">
+                  <button type="button" className={`mailbox-chip ${!mailboxFilter ? 'active' : ''}`} onClick={() => setMailboxFilter('')}>
+                    All
+                  </button>
+                  {mailboxes.map((mailbox) => (
+                    <button
+                      key={mailbox.id}
+                      type="button"
+                      className={`mailbox-chip ${mailbox.address.toLowerCase() === mailboxFilter ? 'active' : ''}`}
+                      onClick={() => chooseMailbox(mailbox.address.toLowerCase())}
+                      title={mailbox.address}
+                    >
+                      {mailboxLabel(mailbox)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {loading && (
               <div className="empty-state loading-state">
@@ -221,8 +337,19 @@ export default function Home() {
               </div>
             )}
 
-            {!loading && filtered.map((message) => {
+            {!loading && error && (
+              <div className="empty-state">
+                <div className="empty-icon"><Mail size={25} /></div>
+                <strong>{error}</strong>
+                <span>Refresh the page and try again.</span>
+              </div>
+            )}
+
+            {!loading && !error && filtered.map((message) => {
               const otherParty = message.direction === 'outbound' ? message.to_addresses[0] ?? 'Recipient' : message.from_address;
+              const recipientText = message.direction === 'inbound'
+                ? `to ${message.to_addresses.length > 1 ? `${message.to_addresses.length} mailboxes` : message.to_addresses[0] ?? 'your mailbox'}`
+                : `from ${message.from_address}`;
               const preview = message.text_body?.replace(/\s+/g, ' ').trim() || 'Open message to view the content.';
               return (
                 <article
@@ -244,17 +371,28 @@ export default function Home() {
                     </div>
                     <div className="message-subject">{message.subject || '(no subject)'}</div>
                     <p>{preview}</p>
+                    <small className="message-context">{recipientText}</small>
                   </div>
                 </article>
               );
             })}
 
-            {!loading && !filtered.length && (
+            {!loading && !error && !filtered.length && (
               <div className="empty-state">
                 <div className="empty-icon"><Mail size={25} /></div>
-                <strong>{query ? 'No messages match your search' : 'Your inbox is empty'}</strong>
-                <span>{query ? 'Try a different sender, subject, or keyword.' : 'Messages received by Resend will appear here.'}</span>
-                {!query && folder === 'Inbox' && <button type="button" className="ghost-action" onClick={() => openCompose()}>Compose a message</button>}
+                <strong>{query ? 'No messages match your search' : `${meta.title} is empty`}</strong>
+                <span>
+                  {query
+                    ? 'Try a different sender, subject, or keyword.'
+                    : view === 'primary'
+                      ? `Messages sent to ${currentUserEmail} will appear here.`
+                      : hasMailboxFilter
+                        ? `No messages for ${activeMailboxLabel.toLowerCase()}.`
+                        : 'Messages for your company mailboxes will appear here.'}
+                </span>
+                {!query && (view === 'primary' || view === 'my-sent') && (
+                  <button type="button" className="ghost-action" onClick={() => openCompose()}>Compose a message</button>
+                )}
               </div>
             )}
           </div>
