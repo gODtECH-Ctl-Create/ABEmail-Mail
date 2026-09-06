@@ -44,6 +44,9 @@ export async function POST(request: Request) {
       headers: email.headers ?? {},
       attachments: email.attachments ?? [],
       status: 'received',
+      is_read: false,
+      is_starred: false,
+      is_trashed: false,
       received_at: email.created_at ?? new Date().toISOString(),
     }, { onConflict: 'resend_email_id' });
 
