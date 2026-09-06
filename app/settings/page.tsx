@@ -83,6 +83,10 @@ export default function SettingsPage() {
   }
 
   function chooseBillingCycle(cycle: BillingCycle) {
+    if (email !== 'admin@waste2light.com') {
+      saveNotice('Only the admin mailbox can change billing');
+      return;
+    }
     setBillingCycle(cycle);
     localStorage.setItem('abemail-billing-cycle', cycle);
     saveNotice(`${cycle === 'yearly' ? 'Yearly' : 'Monthly'} billing selected`);
@@ -199,6 +203,8 @@ export default function SettingsPage() {
                   key={cycle}
                   className={`${styles.cycleCard} ${selected ? styles.selected : ''}`}
                   type="button"
+                  disabled={!isAdmin}
+                  aria-pressed={selected}
                   onClick={() => chooseBillingCycle(cycle)}
                 >
                   <div>
