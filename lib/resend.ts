@@ -9,3 +9,8 @@ export function getResend() {
 export function getFromAddress() {
   return process.env.RESEND_FROM_EMAIL ?? 'ABEmail <info@waste2light.com>';
 }
+
+export function getMailboxFromAddress(mailbox: string) {
+  const displayName = process.env.RESEND_FROM_NAME?.trim() || 'Waste2Light';
+  return `${displayName} <${mailbox}>`;
+}
