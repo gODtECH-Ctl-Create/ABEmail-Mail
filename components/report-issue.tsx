@@ -24,6 +24,8 @@ const REPORTABLE_API_PREFIXES = [
   '/api/notifications',
 ];
 
+let lastAutoReportAt = 0;
+
 function requestPath(input: RequestInfo | URL) {
   try {
     const raw = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
@@ -37,7 +39,12 @@ function reportable(path: string) {
   return REPORTABLE_API_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
-function dispatchReport(detail: ReportContext) {
+function dispatchReport(detail: ReportContext, automatic = false) {
+  if (automatic) {
+    const now = Date.now();
+    if (now - lastAutoReportAt < 15000) return;
+    lastAutoReportAt = now;
+  }
   window.dispatchEvent(new CustomEvent('abemail:report-issue', { detail }));
 }
 
@@ -79,7 +86,7 @@ export default function ReportIssue() {
             if (typeof payload?.error === 'string') errorMessage = payload.error.slice(0, 500);
             if (typeof payload?.code === 'string') errorCode = payload.code.slice(0, 120);
           } catch {}
-          dispatchReport({ action, errorCode, errorMessage, httpStatus: response.status });
+          dispatchReport({ action, errorCode, errorMessage, httpStatus: response.status }, true);
         }
 
         return response;
@@ -89,7 +96,7 @@ export default function ReportIssue() {
             action,
             errorCode: 'NETWORK_ERROR',
             errorMessage: error instanceof Error ? error.message.slice(0, 500) : 'Network request failed.',
-          });
+          }, true);
         }
         throw error;
       }
