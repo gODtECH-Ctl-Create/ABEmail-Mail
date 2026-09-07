@@ -2,76 +2,82 @@
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=190&section=header&text=ABEmail%20Mail&fontSize=52&fontColor=ffffff&fontAlignY=36&animation=fadeIn&color=0:111827,50:4c1d95,100:111827" alt="ABEmail Mail" width="100%" />
+<img src="./docs/assets/abemail-hero.svg" alt="ABEmail Mail animated product hero" width="100%" />
 
-# ✉️ ABEmail Mail
+<p>
+  <img src="https://img.shields.io/badge/status-production--oriented-7c3aed?style=for-the-badge" alt="Production-oriented" />
+  <img src="https://img.shields.io/badge/license-MIT-2563eb?style=for-the-badge" alt="MIT License" />
+  <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 16" />
+  <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase PostgreSQL" />
+  <img src="https://img.shields.io/badge/Resend-email-000000?style=for-the-badge" alt="Resend" />
+  <img src="https://img.shields.io/badge/Vercel-deploy-black?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
+</p>
 
 ### Organization-owned business email, built as a deployable product.
 
-<p>
-  <img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=18&duration=2600&pause=800&color=7C3AED&center=true&vCenter=true&width=900&lines=Inbox+%7C+Sent+%7C+Search+%7C+Drafts+%7C+Attachments;Reply+%7C+Reply+All+%7C+Forward;Supabase+%2B+Resend+%2B+Vercel;Admin+Operations+%7C+Monitoring+%7C+Audit;Built+for+ABE+Tech+Lab+%2F+Waste2Light" alt="ABEmail capabilities" />
-</p>
+<img src="https://readme-typing-svg.demolab.com?font=JetBrains+Mono&size=18&duration=2400&pause=700&color=7C3AED&center=true&vCenter=true&width=1000&lines=Inbox+%7C+Sent+%7C+Search+%7C+Drafts+%7C+Attachments;Reply+%7C+Reply+All+%7C+Forward;Supabase+%2B+Resend+%2B+Vercel;Admin+Operations+%7C+Monitoring+%7C+Incidents+%7C+Audit;Built+for+ABE+Tech+Lab+%2F+Waste2Light" alt="Animated ABEmail capabilities" />
 
 <p>
-  <a href="https://mail.waste2light.com"><img src="https://img.shields.io/badge/live-Waste2Light-111827?style=for-the-badge" alt="Live deployment" /></a>
-  <img src="https://img.shields.io/badge/status-production--oriented%20MVP-4c1d95?style=for-the-badge" alt="Production-oriented MVP" />
-  <img src="https://img.shields.io/badge/license-MIT-2563eb?style=for-the-badge" alt="MIT License" />
-  <img src="https://img.shields.io/badge/Next.js-16-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js" />
-  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ecf8e?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase PostgreSQL" />
-  <img src="https://img.shields.io/badge/Resend-email-000000?style=for-the-badge" alt="Resend" />
-  <img src="https://img.shields.io/badge/Vercel-deploy-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
-</p>
-
-<p>
-  <strong>ABEmail Mail</strong> is a focused business email workspace for organizations that own their domain, control their mailboxes, and want a modern web-based mail experience without operating a traditional mail-server stack themselves.
+  <a href="https://mail.waste2light.com">Live deployment</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#architecture">Architecture</a> ·
+  <a href="#deployment">Deployment</a> ·
+  <a href="#security">Security</a> ·
+  <a href="#licensing">Licensing</a>
 </p>
 
 </div>
 
 ---
 
-## 🧭 What is ABEmail?
+## ⚡ The 30-second version
 
-ABEmail Mail is an **organization-specific business email platform**.
+ABEmail Mail is a focused business email workspace for an organization that owns its domain and mailboxes. The current implementation powers the **ABE Tech Lab / Waste2Light** deployment.
 
-The current deployment is built for **ABE Tech Lab / Waste2Light**, with two connected layers:
+It combines a modern mailbox interface with managed authentication, PostgreSQL persistence, private attachment storage, Resend email transport, and an organization-level operations console.
 
 ```text
-┌─────────────────────────────────────────────────────────────┐
-│                        ABEmail Mail                         │
-├───────────────────────────────┬─────────────────────────────┤
-│        Mail Workspace         │     Operations Console      │
-│                               │                             │
-│ Inbox / Sent / Search         │ Overview / Monitoring       │
-│ Drafts / Attachments          │ Incidents / Security        │
-│ Reply / Forward               │ Capacity / Users           │
-│ Read / Star / Trash            │ Mailboxes / Subscription   │
-│ Responsive UI                 │ Audit / Issue Reports      │
-└───────────────────────────────┴─────────────────────────────┘
+ONE ORGANIZATION
+      ↓
+ONE ISOLATED DEPLOYMENT
+      ↓
+MAIL WORKSPACE + OPERATIONS CONSOLE
+      ↓
+SUPABASE + RESEND + VERCEL
 ```
 
 ABEmail is **not currently a multi-tenant Software as a Service (SaaS) platform**. The intended reuse model is one isolated deployment per organization.
 
+<a href="#readme-top">↑ back to top</a>
+
 ---
 
-## ✨ What has been built
+## ✨ Features
+
+<div align="center">
+<img src="./docs/assets/abemail-matrix.svg" alt="Animated ABEmail capability matrix" width="100%" />
+</div>
 
 ### 📬 Mail workspace
 
-- Inbox and mailbox navigation
-- All Mail
-- Sent / My Sent
-- Starred
-- Trash
-- Read and unread state
-- Mark all visible mail as read
-- Message reading view
-- Search and filtering
-- Responsive desktop, tablet, and mobile layouts
-- Mobile navigation drawer
-- Controlled message scrolling
+| Capability | Included |
+| --- | :---: |
+| Inbox and mailbox navigation | ✅ |
+| All Mail | ✅ |
+| Sent / My Sent | ✅ |
+| Starred | ✅ |
+| Trash | ✅ |
+| Read / unread state | ✅ |
+| Mark all visible mail as read | ✅ |
+| Message reading view | ✅ |
+| Search and filtering | ✅ |
+| Responsive desktop / tablet / mobile UI | ✅ |
+| Mobile navigation drawer | ✅ |
+| Controlled message scrolling | ✅ |
 
-### ✍️ Composition and message actions
+### ✍️ Composition
 
 - New message composition
 - Reply
@@ -79,8 +85,7 @@ ABEmail is **not currently a multi-tenant Software as a Service (SaaS) platform*
 - Forward
 - Multi-recipient Reply All
 - Safe quoted-message handling
-- Attachment upload
-- Attachment delivery
+- Attachment upload and delivery
 - Secure attachment access
 - Draft creation, update, deletion, and autosave
 - Duplicate-save protection for rapid autosave requests
@@ -88,31 +93,17 @@ ABEmail is **not currently a multi-tenant Software as a Service (SaaS) platform*
 
 ### 📡 Email infrastructure
 
-- Resend outbound delivery
+- Resend outbound email delivery
 - Resend inbound receiving
 - Signed inbound webhook verification
-- Supabase PostgreSQL persistence
-- Delivery-event ingestion support
+- PostgreSQL-backed message persistence
+- Provider delivery-event ingestion support
 - Bounce, delay, failure, complaint, and suppression tracking
-- Idempotent provider-event storage
+- Idempotent provider-event storage keyed by provider event identifiers
 
-### 🔐 Authentication and access control
+### 🛡️ Operations console
 
-- Supabase Authentication
-- Protected routes
-- Authenticated server-side application programming interfaces (APIs)
-- Mailbox-scoped operations
-- Server-side Admin authorization
-- Organization-level Admin allowlist
-- Row Level Security (RLS)
-- Private attachment storage
-- Administrative audit records
-
----
-
-## 🛡️ ABE Tech Lab Operations Console
-
-The current Waste2Light deployment includes an organization-level Admin console so the mail system can be operated as a real service.
+The Waste2Light deployment includes an organization-level Admin console:
 
 ```text
 /admin
@@ -128,46 +119,70 @@ The current Waste2Light deployment includes an organization-level Admin console 
 └── Audit Log
 ```
 
-### Operations capabilities
+Capabilities include monitoring, incident management, user problem reporting, system events, delivery tracking, health checks, mailbox operations, user access operations, subscription operations, and administrative audit history.
 
-- Overview dashboard
-- Application and mail-flow monitoring
-- Incident management
-- User issue reporting
-- System-event tracking
-- Resend delivery monitoring
-- Scheduled health checks
-- Mailbox management
-- User access management
-- Subscription operations
-- Administrative audit log
-- P1 / P2 / P3 incident support
-- Automatic incident detection from critical or repeated signals
+### 🔐 Authentication and access control
 
-Admin access uses the normal ABEmail authentication account. There is no separate Admin password.
+- Supabase Authentication
+- Protected routes
+- Authenticated server-side Application Programming Interfaces (APIs)
+- Mailbox-scoped operations
+- Server-side Admin authorization
+- Organization-level Admin allowlist
+- Row Level Security (RLS)
+- Private attachment storage
+- Administrative audit records
+
+<a href="#readme-top">↑ back to top</a>
+
+---
+
+## 🌀 Live mail-flow visualization
+
+<div align="center">
+<img src="./docs/assets/abemail-flow.svg" alt="Animated ABEmail mail flow" width="100%" />
+</div>
+
+The flow is deliberately simple:
 
 ```text
-Normal login
-     ↓
-Authenticated Supabase user
-     ↓
-Server-side email allowlist check
-     ↓
-ABEMAIL_ADMIN_EMAILS
-     ↓
-/admin
+                        ┌───────────────────┐
+                        │  External sender  │
+                        └─────────┬─────────┘
+                                  ↓
+                           ┌─────────────┐
+                           │    Resend   │
+                           └──────┬──────┘
+                                  ↓
+                         signed webhook
+                                  ↓
+                      ┌────────────────────┐
+                      │    ABEmail API     │
+                      └─────────┬──────────┘
+                                ↓
+                    ┌────────────────────────┐
+                    │ Supabase PostgreSQL    │
+                    └───────────┬────────────┘
+                                ↓
+                         ┌──────────────┐
+                         │   Mailbox    │
+                         └──────────────┘
 ```
+
+Outgoing mail travels back through the authenticated ABEmail API and Resend to the external recipient.
 
 ---
 
 ## 🧠 Architecture
 
+<a name="architecture"></a>
+
 ```mermaid
 graph TD
-    U[User Browser] --> A[ABEmail Mail Workspace]
-    A --> N[Next.js Application]
+    B[Browser] --> U[ABEmail Mail UI]
+    U --> N[Next.js Application]
 
-    N --> S[Supabase Auth]
+    N --> A[Supabase Auth]
     N --> DB[(Supabase PostgreSQL)]
     N --> ST[(Supabase Storage)]
     N --> R[Resend]
@@ -175,109 +190,96 @@ graph TD
     R -->|Inbound mail| W[Signed Webhook]
     W --> N
 
-    R -->|Delivery events| D[Delivery Event Ingestion]
-    D --> DB
+    R -->|Provider events| E[Delivery Event Ingestion]
+    E --> DB
 
-    N --> O[Admin Operations Console]
+    N --> O[Admin Operations]
     O --> DB
 
     V[Vercel] --> N
 ```
 
-### ⚙️ Stack at a glance
+### ⚙️ Technology stack
 
 <p align="center">
-  <img src="https://skillicons.dev/icons?i=nextjs,react,ts,nodejs,postgres,supabase,vercel&perline=8" alt="ABEmail technology stack" />
+  <img src="https://skillicons.dev/icons?i=nextjs,react,ts,nodejs,postgres,supabase,vercel&perline=8" alt="ABEmail technology stack icons" />
 </p>
 
-| Layer | Technology | Purpose |
+| Layer | Technology | Role |
 | --- | --- | --- |
-| Framework | Next.js | Web application, routing, server APIs |
+| Framework | Next.js | Application framework, routing, server APIs |
 | UI | React | Mail workspace and Admin interface |
-| Language | TypeScript | Application code and type safety |
+| Language | TypeScript | Type-safe application code |
 | Authentication | Supabase Auth | Identity and sessions |
-| Database | Supabase PostgreSQL | Mail, drafts, events, Admin data |
+| Database | Supabase PostgreSQL | Mail, drafts, events, Admin records |
 | Storage | Supabase Storage | Private attachments |
-| Email | Resend | Sending, receiving, webhooks, delivery events |
+| Email | Resend | Send, receive, webhooks, provider events |
 | Hosting | Vercel | Deployment and scheduled jobs |
 
 ---
 
-## 🔄 Mail flow
-
-### Incoming
+## 🏗️ Internal system map
 
 ```text
-External sender
-      ↓
-Resend inbound receiving
-      ↓
-Signed webhook
-      ↓
-ABEmail webhook handler
-      ↓
-Validate + normalize
-      ↓
-Supabase PostgreSQL
-      ↓
-ABEmail mailbox
-```
-
-### Outgoing
-
-```text
-Compose / Reply / Forward
-           ↓
-Authenticated ABEmail API
-           ↓
-         Resend
-           ↓
-    External recipient
-```
-
-### Monitoring
-
-```text
-Application + mail events
-          ↓
-Monitoring layer
-          ↓
-Incidents / audit / alerts
-          ↓
-Admin Operations Console
+                             ABEMAIL
+                                │
+            ┌───────────────────┴───────────────────┐
+            │                                       │
+     MAIL WORKSPACE                          OPERATIONS LAYER
+            │                                       │
+     ┌──────┼───────┐                       ┌───────┼────────┐
+     │      │       │                       │       │        │
+   Inbox  Compose  Search                 Monitor Incidents Audit
+     │      │       │                       │       │        │
+     └──────┴───────┘                       └───────┴────────┘
+            │                                       │
+            └──────────────────┬────────────────────┘
+                               ↓
+                        SUPABASE DATA
+                               │
+                ┌──────────────┼──────────────┐
+                │              │              │
+              Auth         PostgreSQL       Storage
+                │              │              │
+                └──────────────┴──────┬───────┘
+                                      ↓
+                                    RESEND
+                                      │
+                           external mail network
 ```
 
 ---
 
-## 🗺️ Product status
+## 📊 Current product status
 
 ```text
-Core mail product             ████████████████████  COMPLETE
-Authentication                ████████████████████  COMPLETE
-Send / receive                ████████████████████  COMPLETE
-Attachments                   ████████████████████  COMPLETE
-Drafts / autosave             ████████████████████  COMPLETE
-Search                        ████████████████████  COMPLETE
-Admin console                 ████████████████████  MERGED
-Admin database                ████████████████████  APPLIED
-Admin validation              ███████████████░░░░░  IN PROGRESS
-Security hardening            ██████████░░░░░░░░░░  FOLLOW-UP
-Gmail deliverability          ██████████░░░░░░░░░░  FOLLOW-UP
-Automated tests               █████░░░░░░░░░░░░░░░  FOLLOW-UP
-Web Push notifications        ███████████████░░░░░  PARKED
-Cloudflare migration          ██░░░░░░░░░░░░░░░░░░  FUTURE
-Commercial licensing model    ██░░░░░░░░░░░░░░░░░░  FUTURE
+CORE MAIL                  ████████████████████  COMPLETE
+AUTHENTICATION             ████████████████████  COMPLETE
+SEND / RECEIVE             ████████████████████  COMPLETE
+REPLY / FORWARD            ████████████████████  COMPLETE
+ATTACHMENTS                ████████████████████  COMPLETE
+DRAFTS / AUTOSAVE          ████████████████████  COMPLETE
+SEARCH                     ████████████████████  COMPLETE
+ADMIN CONSOLE              ████████████████████  MERGED
+ADMIN DATABASE             ████████████████████  APPLIED
+ADMIN VALIDATION           ███████████████░░░░░  ACTIVE FOLLOW-UP
+SECURITY HARDENING         ██████████░░░░░░░░░░  FOLLOW-UP
+GMAIL DELIVERABILITY       ██████████░░░░░░░░░░  FOLLOW-UP
+AUTOMATED TEST SUITE       █████░░░░░░░░░░░░░░░  FOLLOW-UP
+WEB PUSH                   ███████████████░░░░░  PARKED
+CLOUDFLARE MIGRATION       ██░░░░░░░░░░░░░░░░░░  FUTURE
+COMMERCIAL LICENSING       ██░░░░░░░░░░░░░░░░░░  FUTURE
 ```
 
-### Current branch model
+### Current branches
 
 ```text
 main
-├── feature/security-hardening   # active unmerged security work
-└── feature/web-push-v2           # parked Web Push work
+├── feature/security-hardening   # active unmerged hardening work
+└── feature/web-push-v2          # intentionally parked notification work
 ```
 
-Completed feature branches are merged and removed.
+Completed feature branches are removed after their work is merged or superseded.
 
 ---
 
@@ -287,8 +289,8 @@ Completed feature branches are merged and removed.
 
 - Node.js 22+
 - npm
-- Supabase project
-- Resend account and verified domain for real email testing
+- A Supabase project
+- A Resend account and verified domain for real email testing
 
 ### Install
 
@@ -296,13 +298,17 @@ Completed feature branches are merged and removed.
 npm install
 ```
 
-### Run locally
+### Start development
 
 ```bash
 npm run dev
 ```
 
-Then open `http://localhost:3000`.
+Then open:
+
+```text
+http://localhost:3000
+```
 
 ### Production build
 
@@ -310,19 +316,19 @@ Then open `http://localhost:3000`.
 npm run build
 ```
 
-> The repository currently exposes `dev`, `build`, and `start` scripts. A dedicated automated test command and dedicated TypeScript check command remain part of the hardening backlog.
+> The current repository exposes `dev`, `build`, and `start` scripts. Dedicated `typecheck` and automated test scripts remain part of the hardening backlog.
 
 ---
 
-## 🔑 Environment variables
+## 🔑 Environment configuration
 
-Create a local environment file:
+Create a local environment file from the template:
 
 ```bash
 cp .env.example .env.local
 ```
 
-### Application configuration
+### Core application variables
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL
@@ -336,24 +342,33 @@ RESEND_FROM_EMAIL
 NEXT_PUBLIC_APP_URL
 ```
 
-### Admin configuration
+### Admin variables
 
 ```text
 ABEMAIL_ADMIN_EMAILS
 CRON_SECRET
 ```
 
-`ABEMAIL_ADMIN_EMAILS` defines the email addresses allowed to enter `/admin`.
+`ABEMAIL_ADMIN_EMAILS` controls who may enter `/admin`.
 
 `CRON_SECRET` authenticates scheduled health-check requests.
 
-Never commit secrets, service-role credentials, webhook secrets, or private provider credentials.
+Never commit:
+
+- Supabase service-role credentials
+- Resend API keys
+- webhook signing secrets
+- cron secrets
+- mailbox passwords
+- private provider credentials
+
+Use Vercel or another secrets manager for deployment values.
 
 ---
 
 ## 🗄️ Supabase database
 
-The production baseline uses ordered migrations:
+The current production baseline uses ordered migrations:
 
 ```text
 001_email_core.sql
@@ -369,17 +384,17 @@ The production baseline uses ordered migrations:
 
 | Migration | Purpose |
 | --- | --- |
-| `001_email_core.sql` | Foundational mailboxes and message schema |
+| `001_email_core.sql` | Core mailbox and message schema |
 | `002_correct_emmanuel_abah_email.sql` | Mailbox address correction |
 | `003_settings_notifications_billing.sql` | Settings, notification preferences, subscription data |
 | `004_email_drafts.sql` | Draft persistence |
-| `005_message_state.sql` | Message state operations |
+| `005_message_state.sql` | Message-state operations |
 | `006_attachments_storage.sql` | Private attachment storage and metadata |
-| `007_admin_operations.sql` | Incidents, system events, reports, audit data |
-| `008_resend_delivery_events.sql` | Provider delivery-event storage |
-| `009_incident_alerts.sql` | Incident alert structures |
+| `007_admin_operations.sql` | Incidents, system events, reports, Admin audit data |
+| `008_resend_delivery_events.sql` | Resend provider delivery-event storage |
+| `009_incident_alerts.sql` | Incident alert and operational structures |
 
-Apply migrations in order. Do not apply parked/future migrations unless the feature is explicitly activated.
+Apply migrations in order. **Do not apply the parked Web Push migration unless Web Push is intentionally reactivated.**
 
 ---
 
@@ -390,12 +405,12 @@ Each organization deployment needs its own Resend configuration.
 Configure:
 
 1. A verified sending domain
-2. The sender address
+2. The organization's sender address
 3. A Resend API key
 4. Inbound receiving
 5. The ABEmail webhook endpoint
 6. The webhook signing secret
-7. The delivery events required by Admin monitoring
+7. Delivery events used by the Admin monitoring layer
 
 Current Waste2Light webhook:
 
@@ -403,152 +418,156 @@ Current Waste2Light webhook:
 https://mail.waste2light.com/api/webhooks/resend
 ```
 
-Replace this with the new organization's endpoint when reusing ABEmail.
+When reusing ABEmail, replace the domain, sender address, and endpoint with the new organization's values.
 
 ---
 
-## 🌍 Domain and DNS setup
+## 🌍 Domain and DNS
 
-A deployment normally needs Domain Name System (DNS) records for:
+A deployment normally requires Domain Name System (DNS) records for:
 
 - domain verification
-- sender authentication
 - Sender Policy Framework (SPF)
 - DomainKeys Identified Mail (DKIM)
 - Domain-based Message Authentication, Reporting, and Conformance (DMARC)
-- inbound routing where required
-- application-domain hosting records
+- inbound mail routing where required
+- application-domain hosting
 
-DNS configuration is deployment-specific and must not be copied from Waste2Light.
+DNS records are organization-specific. Never copy the Waste2Light records into another deployment unchanged.
 
 ---
 
 ## 🏢 Deploying ABEmail for another organization
 
-ABEmail can be reused as an **isolated organization deployment**.
-
-### Recommended sequence
+ABEmail is designed to be reusable as an **isolated organization deployment**.
 
 ```text
-01  Clone the repository
+01  Clone / fork the repository
 02  Create an isolated Supabase project
 03  Configure Supabase Authentication
-04  Apply the ordered database migrations
+04  Apply the ordered migrations
 05  Create/configure the organization's Resend account
 06  Verify the organization's mail domain
 07  Configure sending and inbound receiving
-08  Configure the signed Resend webhook
-09  Configure organization mailboxes
-10  Create a Vercel project
+08  Configure the signed webhook
+09  Configure mailboxes
+10  Create the hosting project
 11  Add environment variables
-12  Set organization Admin email(s)
+12  Set the organization's Admin email(s)
 13  Set CRON_SECRET
 14  Deploy
 15  Test authentication and mailbox isolation
 16  Test send and receive
 17  Test attachments and drafts
-18  Test Admin access and permissions
-19  Validate SPF, DKIM, and DMARC
+18  Test Admin permissions and operations
+19  Validate DNS and mail authentication
 20  Complete production smoke and recovery checks
 ```
 
-### What changes per organization
+### Deployment-specific values
 
 ```text
-Domain
+Domain names
 Mailbox addresses
 Supabase project
-Resend account
-Resend domain
+Resend account and domain
 API keys and secrets
 Admin email(s)
 CRON_SECRET
 DNS records
-Vercel project
-Organization-specific seed data
+Hosting project
+Organization seed data
 ```
+
+The application UI and codebase represent the ABEmail product. Organization-specific configuration belongs in deployment variables and infrastructure rather than source edits.
 
 ---
 
-## 🎨 Branding and UI integrity
+## 🎨 Brand and UI integrity
 
-ABEmail has a defined visual identity, interface, terminology, and interaction model.
+ABEmail is intentionally designed as a product, not as an unbranded starter kit.
 
-For official ABE Tech Lab / Waste2Light deployments, the intended rule is:
+For official ABE Tech Lab / Waste2Light deployments, the intended policy is:
 
 ```text
-KEEP THE PRODUCT IDENTITY.
+KEEP THE BRAND.
 KEEP THE UI.
-KEEP THE BRANDING.
+KEEP THE TERMINOLOGY.
+KEEP THE PRODUCT IDENTITY.
 KEEP THE SECURITY BOUNDARIES.
 ```
 
-Do not:
+Do not, without authorization:
 
 - remove ABEmail branding
-- white-label the interface without written authorization
-- materially redesign the user interface without authorization
+- white-label the interface
+- materially redesign the user interface
 - remove copyright or license notices
-- present a modified deployment as an official ABEmail build without authorization
+- present a modified deployment as an official ABEmail build
 
-### Legal status today
+### Current legal position
 
-The repository currently uses the **MIT License**. MIT is permissive and allows modification, redistribution, sublicensing, and commercial use as long as the required copyright and license notices are retained.
+The repository currently carries the **MIT License**, which is permissive and allows modification, redistribution, sublicensing, and commercial use subject to its notice requirements.
 
-Therefore, these branding rules are currently **product policy and deployment guidance**, not restrictions created by the MIT License.
+Therefore, the branding/UI rules above are currently **product policy and deployment guidance**, not restrictions created by the present MIT license.
 
-Before external commercial distribution under stronger conditions, the licensing model should be changed deliberately to a suitable proprietary/commercial agreement.
+Before controlled external commercial distribution, the licensing model should be deliberately replaced with a suitable proprietary or commercial agreement.
 
 ---
 
-## 🧱 Future protection and commercial licensing
+## 🧱 Licensing and extreme protection roadmap
 
-For controlled external distribution, ABEmail can move to a layered commercial protection model:
+The long-term protection model can be layered rather than relying on one trick:
 
 ```text
-Copyright ownership
+COPYRIGHT OWNERSHIP
         ↓
-Proprietary / commercial license
+PROPRIETARY / COMMERCIAL LICENSE
         ↓
-Explicit permitted-use terms
+PERMITTED-USE DEFINITION
         ↓
-Brand + UI restrictions
+BRAND + UI RESTRICTIONS
         ↓
-No unauthorized white-labeling
+NO UNAUTHORIZED WHITE-LABELING
         ↓
-No unauthorized resale / sublicensing
+NO UNAUTHORIZED RESALE / SUBLICENSING
         ↓
-Deployment registration
+DEPLOYMENT REGISTRATION
         ↓
-License activation / entitlement records
+LICENSE ACTIVATION / ENTITLEMENT
         ↓
-Signed releases + provenance
+SIGNED RELEASES + PROVENANCE
         ↓
-Commercial fees / royalties where contracted
+SOFTWARE BILL OF MATERIALS (SBOM)
         ↓
-Termination + breach provisions
+COMMERCIAL FEES / ROYALTIES WHERE CONTRACTED
+        ↓
+TERMINATION + BREACH REMEDIES
 ```
 
 Potential technical provenance mechanisms include:
 
 - signed releases
-- source provenance markers
+- copyright and provenance markers
 - build metadata
-- software bill of materials (SBOM)
+- Software Bill of Materials (SBOM)
+- version identifiers
 - deployment identifiers
 - license activation records
-- version/entitlement tracking
-- optional, explicitly disclosed license-validation services
+- entitlement/version tracking
+- explicitly disclosed license-validation services
 
-No source-code mechanism can guarantee that a person who completely controls a copy of the source cannot remove an identifier. Likewise, arbitrary independent deployments cannot be reliably discovered without a legitimate observable connection, contractual reporting requirement, or license activation process.
+No source-code mechanism can make an identifier literally impossible to remove from a copy that another party fully controls. Likewise, arbitrary independent deployments cannot be reliably discovered without a legitimate observable connection or contractual reporting mechanism.
 
-The strongest practical model is therefore **legal ownership + commercial licensing + controlled distribution + technical provenance + explicit operational controls**, not a hidden tracking mechanism.
+The strongest practical model is **legal protection + controlled distribution + technical provenance + explicit activation and entitlement controls**.
 
 ---
 
-## 🔐 Security model
+## 🔐 Security
 
-ABEmail uses several security boundaries:
+<a name="security"></a>
+
+ABEmail is designed around layered security boundaries:
 
 - Supabase Authentication for identity
 - Server-side authorization for sensitive operations
@@ -557,91 +576,99 @@ ABEmail uses several security boundaries:
 - Server-side privileged database access
 - Signed Resend webhook verification
 - Private attachment storage
-- Server-side Admin authorization
+- Admin authorization through a server-side allowlist
 - Administrative audit logging
-- Incident and monitoring records
-- Deployment secrets kept outside source control
+- Incident and monitoring records separated from normal mailbox data
 
-Security hardening remains an active engineering track on `feature/security-hardening`.
+The dedicated `feature/security-hardening` branch contains additional unmerged hardening work and should be reviewed before final production sign-off.
 
 ---
 
 ## 🛰️ Operations and monitoring
 
-The Admin layer is designed to make operational failures visible.
+The Admin console turns the mail workspace into an operable service rather than only a user interface.
 
 ### Monitored signals
 
 - application/system events
-- inbound mail events
-- outbound mail events
-- delivery events
-- bounce/failure events
+- mail-flow volume
+- outbound failures
+- Resend delivery events
 - user issue reports
-- scheduled health checks
-- DNS and email authentication signals
+- open incidents
+- scheduled health-check results
+- DNS and email-authentication signals
 
-### Incident support
+### Incident model
 
-Critical events and repeated error/warning patterns can create incidents and preserve their operational history in the Admin data layer.
+Critical and repeated signals can be correlated into P1, P2, or P3 incidents with operational history and alert records.
 
-The design is provider-neutral so future Vercel, Supabase, and Cloudflare signals can feed the same operational model.
+The monitoring model is provider-neutral so future Vercel, Supabase, and Cloudflare signals can feed the same operational system.
 
 ---
 
-## 🧪 Validation philosophy
+## 🧪 Validation and production readiness
 
-ABEmail tracks maturity separately from feature implementation:
+Current validation priorities:
 
 ```text
-Implemented
-   ↓
-Configured
-   ↓
-Build-validated
-   ↓
-Provider-validated
-   ↓
-End-to-end validated
-   ↓
-Production signed off
+[1] Admin login and access boundary
+[2] Admin user and mailbox operations
+[3] Incident lifecycle
+[4] Audit logging
+[5] Scheduled health checks
+[6] Resend send / receive verification
+[7] Gmail deliverability
+[8] Role-boundary testing
+[9] Failure-injection testing
+[10] Backup / recovery validation
+[11] Automated test suite + typecheck
 ```
 
-This prevents configuration problems, provider setup, or device-specific validation from being mistaken for missing application code.
+The Web Push notification work is intentionally excluded from this readiness sequence and remains parked on `feature/web-push-v2`.
 
 ---
 
-## ⏸️ Parked work
-
-### Web Push notifications
-
-Real background Web Push notification support is implemented on:
+## 📚 Repository structure
 
 ```text
-feature/web-push-v2
+app/                     Next.js routes, pages, APIs, and UI
+components/              Interactive mail and Admin components
+lib/                     Supabase, Resend, Admin, monitoring, and app helpers
+public/                  Public assets
+docs/                    Product, operational, security, and visual documentation
+  assets/                Local animated README SVGs
+supabase/migrations/     Ordered database schema and policy migrations
+proxy.ts                 Request/authentication proxy
+next.config.ts           Next.js configuration
+package.json             Dependencies and scripts
+.env.example             Environment template
+LICENSE                  Current license
 ```
 
-It is intentionally parked.
+### README visual assets
 
-Do not apply its migration or configure its VAPID (Voluntary Application Server Identification) keys unless Web Push is explicitly reactivated.
-
----
-
-## 🛠️ Active engineering work
-
-### Security hardening
-
-The remaining security branch contains work around authenticated mailbox scoping, security headers, security policies, and the production security checklist.
+The README intentionally uses project-owned animated SVGs:
 
 ```text
-feature/security-hardening
+docs/assets/abemail-hero.svg
+   ↳ animated hero / product identity
+
+docs/assets/abemail-flow.svg
+   ↳ animated mail transport visualization
+
+docs/assets/abemail-matrix.svg
+   ↳ animated capability matrix
+
+docs/assets/abemail-footer.svg
+   ↳ animated transmission footer
 ```
 
-It should be reconciled with the latest `main` before merging.
+This keeps the more unusual visual treatment close to the repository rather than making the README dependent on a collection of random third-party GIFs.
 
 ---
 
-## 📚 Documentation map
+## 🧩 Documentation map
 
 ```text
 docs/
@@ -652,34 +679,74 @@ docs/
 └── web-push.md
 ```
 
-The README is the **front door**. Deeper provider setup, security decisions, and feature-specific implementation notes belong in `docs/`.
+The README is the product and deployment front door. Feature-specific implementation details belong under `docs/`.
 
 ---
 
-## ⚖️ License and ownership
+## ⏸️ Parked work
 
-ABEmail Mail is currently distributed under the **MIT License**. See [`LICENSE`](./LICENSE) for the complete current terms and copyright notice.
+### Web Push notifications
 
-Current copyright holder named in the license:
+Implemented on `feature/web-push-v2`, but intentionally parked.
 
-**Ayo Richard ABE [gODtECH]**
+Do not:
 
-The present MIT model should not be confused with a restriction on modification or commercial reuse. Stronger controls such as no white-labeling, UI immutability, royalty obligations, deployment registration, or commercial support terms require an appropriate license and/or separate written agreement.
+- apply the Web Push database migration
+- configure VAPID (Voluntary Application Server Identification) keys
+- merge the Web Push branch
+
+until notification work is explicitly reactivated.
+
+### Cloudflare migration
+
+Future infrastructure work. Vercel remains the current application runtime.
+
+### Commercial multi-tenant Admin platform
+
+A possible future product architecture. The current Admin console is specifically for the deployment owner/operator and is not the commercial multi-tenant Admin product.
 
 ---
 
-## 🌱 Project principle
+## 🧭 Design philosophy
 
-ABEmail should feel like a real product, not a disposable demo and not a generic unbranded starter kit.
+ABEmail is meant to feel like a real product while staying straightforward to deploy:
 
-**Reusable architecture. Intentional identity. Clear deployment boundaries. Strong operational visibility. Secrets outside source control.**
+```text
+SIMPLE FOR USERS
+        +
+CONTROLLED FOR OPERATORS
+        +
+REUSABLE FOR DEPLOYMENTS
+        +
+EXPLICIT ABOUT SECURITY
+        +
+CAREFUL ABOUT PROVENANCE
+```
+
+The goal is not to recreate a traditional mail-server stack. The goal is to provide a focused organization-owned mail experience with an operational control plane around it.
 
 ---
 
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=waving&height=120&section=footer&animation=fadeIn&color=0:111827,50:4c1d95,100:111827" alt="ABEmail footer" width="100%" />
+<img src="./docs/assets/abemail-footer.svg" alt="Animated ABEmail transmission footer" width="100%" />
 
-<a href="#readme-top">⬆ Back to top</a>
+### ✉️ ABEmail Mail
+
+**Organization-owned. Deployment-ready. Built with intent.**
+
+<sub>ABE Tech Lab / gODtECH</sub>
 
 </div>
+
+<a href="#readme-top">↑ back to top</a>
+
+---
+
+## 📄 License
+
+ABEmail Mail currently ships under the **MIT License**. See [`LICENSE`](./LICENSE) for the complete terms.
+
+The current copyright holder named in that file is **Ayo Richard ABE [gODtECH]**.
+
+For stronger restrictions around branding, white-labeling, modification, commercial reuse, royalties, or deployment entitlements, adopt a separate proprietary/commercial license before external distribution.
