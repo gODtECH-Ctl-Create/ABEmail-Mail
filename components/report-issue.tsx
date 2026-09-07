@@ -4,13 +4,42 @@ import { useEffect, useMemo, useState } from 'react';
 import { Bug, CheckCircle2, X } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 
-type ReportContext = {
+export type ReportContext = {
   action?: string;
   errorCode?: string;
   errorMessage?: string;
   httpStatus?: number;
   incidentKey?: string;
 };
+
+const REPORTABLE_API_PREFIXES = [
+  '/api/send',
+  '/api/send-many',
+  '/api/send-with-attachments',
+  '/api/drafts',
+  '/api/messages',
+  '/api/inbox',
+  '/api/search',
+  '/api/attachments',
+  '/api/notifications',
+];
+
+function requestPath(input: RequestInfo | URL) {
+  try {
+    const raw = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
+    return new URL(raw, window.location.origin).pathname;
+  } catch {
+    return '';
+  }
+}
+
+function reportable(path: string) {
+  return REPORTABLE_API_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+function dispatchReport(detail: ReportContext) {
+  window.dispatchEvent(new CustomEvent('abemail:report-issue', { detail }));
+}
 
 export default function ReportIssue() {
   const [open, setOpen] = useState(false);
@@ -24,11 +53,51 @@ export default function ReportIssue() {
       const detail = (event as CustomEvent<ReportContext>).detail ?? {};
       setContext(detail);
       setResult(null);
+      setDescription('');
       setOpen(true);
     };
 
     window.addEventListener('abemail:report-issue', handleRequest);
     return () => window.removeEventListener('abemail:report-issue', handleRequest);
+  }, []);
+
+  useEffect(() => {
+    const originalFetch = window.fetch.bind(window);
+
+    window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = requestPath(input);
+      const action = path.replace(/^\/api\//, '').replace(/\//g, '.');
+
+      try {
+        const response = await originalFetch(input, init);
+
+        if (reportable(path) && response.status >= 500) {
+          let errorMessage = `Request failed with status ${response.status}.`;
+          let errorCode = `HTTP_${response.status}`;
+          try {
+            const payload = await response.clone().json();
+            if (typeof payload?.error === 'string') errorMessage = payload.error.slice(0, 500);
+            if (typeof payload?.code === 'string') errorCode = payload.code.slice(0, 120);
+          } catch {}
+          dispatchReport({ action, errorCode, errorMessage, httpStatus: response.status });
+        }
+
+        return response;
+      } catch (error) {
+        if (reportable(path)) {
+          dispatchReport({
+            action,
+            errorCode: 'NETWORK_ERROR',
+            errorMessage: error instanceof Error ? error.message.slice(0, 500) : 'Network request failed.',
+          });
+        }
+        throw error;
+      }
+    }) as typeof window.fetch;
+
+    return () => {
+      window.fetch = originalFetch;
+    };
   }, []);
 
   const browser = useMemo(() => navigator.userAgent.slice(0, 160), []);
@@ -79,7 +148,7 @@ export default function ReportIssue() {
     <>
       <button
         type="button"
-        onClick={() => { setContext({}); setResult(null); setOpen(true); }}
+        onClick={() => { setContext({}); setResult(null); setDescription(''); setOpen(true); }}
         aria-label="Report a problem"
         title="Report a problem"
         style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 45, width: 42, height: 42, borderRadius: 999, border: '1px solid #dfe2e6', background: '#fff', display: 'grid', placeItems: 'center', color: '#4e545c', boxShadow: '0 8px 25px rgba(0,0,0,.1)', cursor: 'pointer' }}
