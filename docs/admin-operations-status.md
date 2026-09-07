@@ -2,7 +2,7 @@
 
 ## Current branch
 
-`feature/waste2light-admin`
+`feature/waste2light-admin-v2`
 
 ## Implemented
 
@@ -13,12 +13,12 @@
 - Protected incident list/status API with audit logging.
 - Dedicated `/admin/incidents` and `/admin/monitoring` views.
 - Automatic monitoring signals for outbound send success/failure and inbound Resend webhook success/failure.
-- User-facing `Report a problem` widget and safe diagnostic report API.
+- User-facing `Report a problem` component and safe diagnostic report API.
 - Reports can attach to a matching active incident or create a P3 user-report incident candidate.
 
 ## Not yet production-applied
 
-The Admin database migration `006_admin_operations.sql` remains branch-only. Apply it only as part of the approved Admin rollout.
+The Admin database migration `007_admin_operations.sql` remains branch-only. Apply it only as part of the approved Admin rollout.
 
 ## Provider portability
 
