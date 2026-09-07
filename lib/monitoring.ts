@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { getResend } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 type MonitorEvent = {
@@ -36,18 +37,50 @@ type IncidentInput = {
 };
 
 const safeString = (value: unknown) => (typeof value === 'string' && value.length <= 5000 ? value : undefined);
+const adminEmails = () => (process.env.ABEMAIL_ADMIN_EMAILS ?? '').split(',').map((email) => email.trim().toLowerCase()).filter(Boolean);
 
-async function createAdminAlert(input: { incidentId: string; alertKey: string; severity: 'P1' | 'P2' | 'P3' | 'P4'; title: string; message: string }) {
+async function createAdminAlert(input: {
+  incidentId: string;
+  alertKey: string;
+  severity: 'P1' | 'P2' | 'P3' | 'P4';
+  title: string;
+  message: string;
+}) {
   try {
     const supabase = getSupabaseAdmin();
-    await supabase.from('admin_alerts').upsert({
+    const { data: existing } = await supabase
+      .from('admin_alerts')
+      .select('id')
+      .eq('alert_key', input.alertKey)
+      .maybeSingle();
+    if (existing) return;
+
+    const { error } = await supabase.from('admin_alerts').insert({
       incident_id: input.incidentId,
       alert_key: input.alertKey,
       severity: input.severity,
       title: input.title,
       message: safeString(input.message) ?? input.title,
       status: 'new',
-    }, { onConflict: 'alert_key', ignoreDuplicates: true });
+    });
+    if (error) throw error;
+
+    if (input.severity === 'P1' || input.severity === 'P2') {
+      const recipients = adminEmails();
+      if (recipients.length) {
+        try {
+          const resend = getResend();
+          await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL ?? recipients[0],
+            to: recipients,
+            subject: `[ABEmail ${input.severity}] ${input.title}`,
+            text: `${input.title}\n\n${safeString(input.message) ?? input.title}\n\nIncident: ${input.alertKey}`,
+          });
+        } catch (error) {
+          console.error('admin alert email delivery failed', error);
+        }
+      }
+    }
   } catch (error) {
     console.error('admin alert write failed', error);
   }
