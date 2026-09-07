@@ -1,21 +1,220 @@
-MIT License
+ABEMAIL MAIL PROPRIETARY SOFTWARE LICENSE
+Version 1.0
+Effective date: 2026-09-07
 
 Copyright (c) 2026 Ayo Richard ABE [gODtECH]
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+ALL RIGHTS RESERVED.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+IMPORTANT
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+This is a proprietary, source-available software license. It is not an open
+source license. No right to use, modify, reproduce, distribute, sublicense,
+sell, host, white-label, or create derivative works from ABEmail Mail is
+granted except as expressly stated in this License or a separate written
+agreement from the Licensor.
+
+1. DEFINITIONS
+
+"Software" means ABEmail Mail and the associated source code, object code,
+configuration, documentation, assets, designs, database migrations, scripts,
+and other materials expressly distributed by the Licensor under this License.
+
+"Licensor" means Ayo Richard ABE [gODtECH] and any successor or entity to
+which the relevant rights have been lawfully assigned.
+
+"Authorized Licensee" means a person or organization that has received
+explicit written authorization from the Licensor to use the Software.
+
+"Authorized Deployment" means a production or evaluation deployment expressly
+permitted by a written agreement with the Licensor.
+
+"Brand Assets" means ABEmail names, logos, marks, visual identity, interface
+design, distinctive product presentation, and associated branding.
+
+"Commercial Agreement" means a separate written agreement, order form, or
+license schedule establishing permitted deployment scope, fees, support, term,
+organization, domain, seat limits, usage limits, royalties, or other commercial
+terms.
+
+2. OWNERSHIP
+
+The Software is protected by copyright and other applicable intellectual
+property laws. Except for rights expressly granted by this License or a
+separate written agreement, the Licensor retains all rights, title, and
+interest in the Software and associated proprietary materials.
+
+No ownership interest is transferred to an Authorized Licensee.
+
+3. LIMITED LICENSE GRANT
+
+Subject to this License and any applicable Commercial Agreement, the Licensor
+may grant an Authorized Licensee a limited, non-exclusive, non-transferable,
+non-sublicensable, revocable license to run the Software only for the
+organization, domain, environment, deployment count, purpose, and term
+expressly authorized in writing.
+
+No license is granted by implication, estoppel, public availability of the
+repository, or access to the source code.
+
+4. RESTRICTIONS
+
+Unless expressly authorized in writing by the Licensor, an Authorized
+Licensee must not:
+
+(a) modify, adapt, translate, or create derivative works of the Software;
+(b) remove, obscure, alter, or replace copyright, license, provenance, or
+    attribution notices;
+(c) remove, replace, or materially alter ABEmail branding or Brand Assets;
+(d) white-label the Software or represent a modified deployment as an
+    official ABEmail product;
+(e) redistribute, publish, mirror, sublicense, lease, rent, sell, transfer,
+    or otherwise make the Software available to a third party;
+(f) provide the Software as a hosted service for unrelated third parties;
+(g) use the Software to build, market, or operate a competing product or
+    service;
+(h) use the Software or its source code to train, fine-tune, evaluate, or
+    build a machine-learning or artificial-intelligence model, dataset, or
+    service, except with explicit written authorization;
+(i) bypass, disable, defeat, remove, or interfere with license validation,
+    deployment registration, entitlement checks, provenance mechanisms, or
+    other access controls included in an authorized release;
+(j) reverse engineer, decompile, disassemble, or attempt to derive protected
+    implementation details from compiled versions, except to the limited
+    extent such restriction is prohibited by applicable law;
+(k) use the Software outside the organization, domain, deployment count, seat
+    count, region, term, or other limits stated in the applicable Commercial
+    Agreement; or
+(l) use the Software in a manner that falsely suggests sponsorship,
+    endorsement, authorship, or official support by the Licensor.
+
+5. BRAND AND USER-INTERFACE INTEGRITY
+
+ABEmail's user interface, interaction model, visual language, terminology,
+and Brand Assets form part of the product identity.
+
+An Authorized Deployment must preserve the official ABEmail product identity
+unless a separate written agreement expressly authorizes changes.
+
+Customer-specific customization may be performed only under an agreement that
+expressly permits the requested customization.
+
+6. DEPLOYMENT REGISTRATION AND PROVENANCE
+
+Where an authorized release includes deployment registration, license keys,
+version identifiers, provenance metadata, software bills of materials (SBOMs),
+signed builds, telemetry, entitlement checks, or license-validation services,
+such mechanisms are part of the authorized licensing system and may not be
+removed or disabled except as expressly permitted in writing.
+
+Any such operational mechanism must be disclosed to the Authorized Licensee in
+the applicable documentation or Commercial Agreement. This License does not
+authorize covert tracking.
+
+7. COMMERCIAL TERMS
+
+The Software may be licensed under paid deployment fees, subscription fees,
+per-seat fees, implementation fees, support fees, usage-based pricing,
+royalties, or other consideration specified in a Commercial Agreement.
+
+No commercial right is granted merely because the Software source code is
+publicly viewable.
+
+Commercial terms, including royalty calculations, reporting obligations,
+audit rights, deployment limits, payment schedules, and renewal terms must be
+specified in the applicable Commercial Agreement.
+
+8. NO SUBLICENSE OR TRANSFER
+
+An Authorized Licensee may not grant rights to any affiliate, contractor,
+customer, reseller, distributor, or other third party unless those rights are
+expressly granted in the applicable Commercial Agreement.
+
+9. CONTRIBUTIONS
+
+No contribution, pull request, patch, issue attachment, or other submission
+creates a license to the Software or transfers intellectual property unless
+the Licensor expressly accepts the contribution under a separate written
+agreement. The Licensor may decline any contribution.
+
+10. THIRD-PARTY COMPONENTS
+
+The Software may contain or depend upon third-party software, libraries,
+frameworks, fonts, icons, services, and other components governed by separate
+licenses or terms. Nothing in this License overrides those separate rights or
+obligations.
+
+11. TERM AND TERMINATION
+
+Unless otherwise stated in a Commercial Agreement, this License begins when
+the Software is obtained or when an Authorized Deployment is activated and
+continues only for the permitted term.
+
+A material breach of this License or an applicable Commercial Agreement may
+result in suspension or termination of the granted rights, subject to any cure
+period or procedure stated in the applicable agreement or required by law.
+
+Upon termination, the Authorized Licensee must stop using the Software and,
+where legally and contractually required, remove active deployments and destroy
+or return copies of source materials in its possession, subject to legally
+required archival copies.
+
+12. NO WARRANTY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE SOFTWARE IS PROVIDED
+"AS IS" AND "AS AVAILABLE", WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
+TITLE, NON-INFRINGEMENT, OR UNINTERRUPTED OR ERROR-FREE OPERATION.
+
+13. LIMITATION OF LIABILITY
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR WILL NOT BE
+LIABLE FOR INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR
+PUNITIVE DAMAGES, OR FOR LOSS OF PROFITS, REVENUE, DATA, BUSINESS, OR GOODWILL,
+ARISING FROM OR RELATED TO THE SOFTWARE OR ITS USE.
+
+Any contractual liability allocation, indemnity, service level, remedy, or
+liability cap beyond this License must be stated in the applicable Commercial
+Agreement.
+
+14. LEGAL COMPLIANCE
+
+Nothing in this License is intended to restrict rights that cannot lawfully be
+restricted in the applicable jurisdiction. Mandatory statutory rights and
+exceptions remain in effect.
+
+15. GOVERNING TERMS
+
+Any governing law, venue, dispute process, data-processing terms, export
+requirements, service levels, support commitments, and commercial remedies
+should be specified in the applicable Commercial Agreement. This License alone
+does not select a jurisdiction for an international deployment.
+
+16. PREVIOUSLY LICENSED VERSIONS
+
+This License applies to versions and revisions of the Software that are
+expressly distributed under this License.
+
+It does not purport to revoke rights already granted under earlier versions of
+the Software that were previously distributed under the MIT License. Existing
+copies that were validly licensed under that prior license remain subject to
+the terms under which those copies were granted.
+
+17. FUTURE LICENSE VERSIONS
+
+The Licensor may publish future versions of this License for future releases.
+A new License version does not automatically alter the terms of a separate
+Commercial Agreement unless that agreement expressly provides for the change.
+
+18. AUTHORIZATION
+
+Commercial use, customization, redistribution, white-labeling, resale,
+sublicensing, integration, or other use outside the explicit permissions of
+this License requires written authorization from the Licensor.
+
+For external deployments, retain a copy of the applicable Commercial Agreement
+and license authorization with the deployment records.
+
+---
+
+END OF ABEMAIL MAIL PROPRIETARY SOFTWARE LICENSE
