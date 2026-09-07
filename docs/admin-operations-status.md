@@ -19,10 +19,13 @@
 - Delivery health metrics in the Admin Monitoring view.
 - User-facing `Report a problem` component and safe diagnostic report API.
 - Reports can attach to a matching active incident or create a P3 user-report incident candidate.
+- Automatic incident detection for critical signals and repeated matching warning/error signals.
+- Deduplicated Admin alert records tied to detected incidents.
+- Admin overview now surfaces new automatic alerts.
 
 ## Not yet production-applied
 
-The Admin database migration `007_admin_operations.sql` and delivery migration `008_resend_delivery_events.sql` remain branch-only. Apply them only as part of the approved Admin rollout.
+The Admin database migrations `007_admin_operations.sql`, `008_resend_delivery_events.sql`, and `009_incident_alerts.sql` remain branch-only. Apply them only as part of the approved Admin rollout.
 
 ## Provider portability
 
@@ -36,8 +39,8 @@ The monitoring model is intentionally provider-neutral. Vercel is the current ru
 ## Remaining implementation
 
 - Connect existing user error states directly to Report a Problem.
-- Add automated P1-P4 incident thresholds and alert routing rather than opening incidents for every single delivery event.
+- Add scheduled/health-check based detection for silent failures such as a stalled inbound pipeline.
 - Add deeper Supabase/Vercel health checks and future Cloudflare signals.
 - Add full Infrastructure, Security and Capacity sections.
-- Add notification routing for critical Admin incidents.
+- Add notification routing for critical Admin alerts through email/web push.
 - Add Admin actions for mailbox and subscription management.
