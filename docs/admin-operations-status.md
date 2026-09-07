@@ -11,10 +11,10 @@
 - Incident and incident-event data model.
 - Structured system-event model with request, trace, deployment and provider context.
 - Protected incident list/status API with audit logging.
-- Dedicated `/admin/incidents`, `/admin/monitoring`, `/admin/security`, `/admin/capacity`, and `/admin/mailboxes` views.
+- Dedicated `/admin/incidents`, `/admin/monitoring`, `/admin/security`, `/admin/capacity`, `/admin/mailboxes`, `/admin/users`, and `/admin/subscription` views.
 - Automatic monitoring signals for outbound send success/failure and inbound Resend webhook success/failure.
 - Resend delivery-event ingestion foundation for sent, delivered, delayed, bounced, complained, suppressed and failed events.
-- Idempotent Resend delivery-event storage keyed by `svix-id` so webhook retries do not create duplicate delivery records.
+- Idempotent delivery-event storage keyed by `svix-id` so webhook retries do not create duplicate delivery records.
 - Provider-status fields on email messages for delivery-state visibility.
 - Delivery health metrics in the Admin Monitoring view.
 - User-facing `Report a problem` component and safe diagnostic report API.
@@ -25,6 +25,8 @@
 - Scheduled daily health-check endpoint covering Supabase connectivity, Resend domain/API status, required configuration, silent inbound-pipeline stalls, MX, SPF, and DMARC.
 - Vercel daily cron configuration for `/api/cron/health`, protected by `CRON_SECRET`.
 - Admin mailbox operations for viewing mailbox state and enabling/disabling application access, with audit logging.
+- Admin user access view with Waste2Light user listing and protected 24-hour suspend/restore actions; Admin accounts cannot be suspended from the console.
+- Admin subscription view for monthly/yearly pricing, status, currency, start date and renewal date without requiring a payment gateway.
 
 ## Not yet production-applied
 
@@ -50,12 +52,19 @@ Higher-frequency silent-failure detection will be added through provider-neutral
 
 Mailbox operations only control application access through the existing `mailboxes.active` field. They do not delete a mailbox or modify Resend/domain routing. Every enable/disable action is recorded in the Admin audit log.
 
+## User access behavior
+
+The Admin user console is for operational access management, not mailbox reassignment. It lists Waste2Light authentication accounts and permits temporary 24-hour suspension or restoration through Supabase Auth. Configured ABE Tech Lab Admin accounts are protected from suspension.
+
+## Subscription behavior
+
+The Admin subscription console stores the commercial record for Waste2Light. It does not process payments. The existing schema is ready for a future Paystack integration through provider and provider-ID fields without requiring a redesign.
+
 ## Remaining implementation
 
 - Connect existing user error states directly to Report a Problem.
 - Add deeper Vercel runtime and Supabase usage/health signals.
 - Add future Cloudflare runtime, routing, HTTPS/certificate, Web Application Firewall (WAF), Distributed Denial-of-Service (DDoS), and service-health signals.
 - Add notification routing for critical Admin alerts through Web Push when credentials are configured.
-- Add user/access management and mailbox assignment controls.
-- Add subscription management actions.
+- Add explicit incident resolution workflow improvements and audit-log viewer.
 - Add final role-boundary, failure-injection, backup/recovery, and production sign-off testing.
