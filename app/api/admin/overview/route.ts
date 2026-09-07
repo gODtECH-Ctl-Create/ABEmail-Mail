@@ -24,23 +24,19 @@ export async function GET() {
       if (result.error && !isMissingTable(result.error)) throw result.error;
     }
 
-    const incidentsResult = await supabase
-      .from('incidents')
-      .select('id,incident_key,title,severity,status,component,first_seen_at,last_seen_at')
-      .order('last_seen_at', { ascending: false })
-      .limit(8);
-
-    const reportsResult = await supabase
-      .from('user_issue_reports')
-      .select('id,report_key,mailbox,action,status,description,created_at,incident_id')
-      .order('created_at', { ascending: false })
-      .limit(8);
+    const [incidentsResult, reportsResult, alertsResult] = await Promise.all([
+      supabase.from('incidents').select('id,incident_key,title,severity,status,component,first_seen_at,last_seen_at').order('last_seen_at', { ascending: false }).limit(8),
+      supabase.from('user_issue_reports').select('id,report_key,mailbox,action,status,description,created_at,incident_id').order('created_at', { ascending: false }).limit(8),
+      supabase.from('admin_alerts').select('id,alert_key,incident_id,severity,title,message,status,created_at').order('created_at', { ascending: false }).limit(6),
+    ]);
 
     const incidents = incidentsResult.error && isMissingTable(incidentsResult.error) ? [] : incidentsResult.data ?? [];
     const reports = reportsResult.error && isMissingTable(reportsResult.error) ? [] : reportsResult.data ?? [];
+    const alerts = alertsResult.error && isMissingTable(alertsResult.error) ? [] : alertsResult.data ?? [];
 
     if (incidentsResult.error && !isMissingTable(incidentsResult.error)) throw incidentsResult.error;
     if (reportsResult.error && !isMissingTable(reportsResult.error)) throw reportsResult.error;
+    if (alertsResult.error && !isMissingTable(alertsResult.error)) throw alertsResult.error;
 
     return NextResponse.json({
       adminEmail: admin.email,
@@ -57,10 +53,12 @@ export async function GET() {
         outbound: outbound.count ?? 0,
         nonSentOutbound: failed.count ?? 0,
         browserNotificationUsers: subscriptions.count ?? 0,
+        newAlerts: alerts.filter((alert) => alert.status === 'new').length,
       },
       billing: billing.data ?? null,
       incidents,
       reports,
+      alerts,
     });
   } catch (error) {
     const code = error instanceof Error ? error.message : '';
