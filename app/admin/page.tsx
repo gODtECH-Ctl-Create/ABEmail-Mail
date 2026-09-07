@@ -78,6 +78,7 @@ export default function AdminPage() {
         <Link href="/admin/incidents" className={styles.primaryButton}>Incidents</Link>
         <Link href="/admin/mailboxes" className={styles.primaryButton}>Mailboxes</Link>
         <Link href="/admin/users" className={styles.primaryButton}>Users</Link>
+        <Link href="/admin/subscription" className={styles.primaryButton}>Subscription</Link>
       </nav>
 
       <section className={styles.metricGrid}>
@@ -96,7 +97,7 @@ export default function AdminPage() {
 
       <section className={styles.panel}><div className={styles.panelHead}><div><p className={styles.eyebrow}>Mailboxes</p><h2>Waste2Light mailboxes</h2></div><span className={styles.counter}>{data.mailboxes.filter((mailbox) => mailbox.active).length} active</span></div><div className={styles.mailboxGrid}>{data.mailboxes.map((mailbox) => <div className={styles.mailboxCard} key={mailbox.address}><div className={styles.mailboxIcon}><Users size={16} /></div><div><strong>{mailbox.display_name || mailbox.address}</strong><span>{mailbox.address}</span></div><b className={mailbox.active ? styles.active : styles.disabled}>{mailbox.active ? 'Active' : 'Inactive'}</b></div>)}</div></section>
 
-      <section className={styles.threeCol}><div className={styles.infoCard}><Database size={18} /><span>Infrastructure</span><strong>Provider-neutral foundation</strong><small>Designed for current Vercel hosting and future Cloudflare runtime migration.</small></div><div className={styles.infoCard}><Wifi size={18} /><span>Email network</span><strong>Resend + DNS monitored</strong><small>Delivery, inbound webhook, MX, SPF, DKIM and DMARC checks feed this console.</small></div><div className={styles.infoCard}><WalletCards size={18} /><span>Subscription</span><strong>{data.billing?.plan_name ?? 'Not configured'}</strong><small>{data.billing ? `${data.billing.billing_cycle} · ${data.billing.status}` : 'Billing record unavailable'}</small></div></section>
+      <section className={styles.threeCol}><div className={styles.infoCard}><Database size={18} /><span>Infrastructure</span><strong>Provider-neutral foundation</strong><small>Designed for current Vercel hosting and future Cloudflare runtime migration.</small></div><div className={styles.infoCard}><Wifi size={18} /><span>Email network</span><strong>Resend + DNS monitored</strong><small>Delivery, inbound, MX, SPF, DKIM and DMARC checks feed this console.</small></div><div className={styles.infoCard}><WalletCards size={18} /><span>Subscription</span><strong>{data.billing?.plan_name ?? 'Not configured'}</strong><small>{data.billing ? `${data.billing.billing_cycle} · ${data.billing.status}` : 'Billing record unavailable'}</small></div></section>
 
       <footer className={styles.footer}>Waste2Light deployment · ABE Tech Lab operations console · Commercial multi-tenant administration stays in the separate ABEmail product.</footer>
     </main>
