@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
 import { Activity, AlertTriangle, ArrowUpRight, Bell, Database, Mail, ShieldCheck, Smartphone, Users, WalletCards, Wifi } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import styles from './admin.module.css';
 
 type Overview = {
@@ -76,6 +76,7 @@ export default function AdminPage() {
         <Link href="/admin/security" className={styles.primaryButton}>Security</Link>
         <Link href="/admin/capacity" className={styles.primaryButton}>Capacity & Usage</Link>
         <Link href="/admin/incidents" className={styles.primaryButton}>Incidents</Link>
+        <Link href="/admin/mailboxes" className={styles.primaryButton}>Mailboxes</Link>
       </nav>
 
       <section className={styles.metricGrid}>
