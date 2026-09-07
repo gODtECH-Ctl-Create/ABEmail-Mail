@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getSupabaseServer } from '@/lib/supabase-server';
 
 const MAIL_DOMAIN = 'waste2light.com';
-const DRAFT_SELECT = 'id,user_id,from_address,to_addresses,cc_addresses,bcc_addresses,subject,html_body,text_body,created_at,updated_at';
+const DRAFT_SELECT = 'id,user_id,from_address,to_addresses,cc_addresses,bcc_addresses,subject,html_body,text_body,attachments,created_at,updated_at';
 
 async function getAuthenticatedUser() {
   const authClient = await getSupabaseServer();
@@ -15,10 +15,44 @@ async function getAuthenticatedUser() {
 
 function cleanAddresses(value: unknown) {
   if (!Array.isArray(value)) return [];
-  return value
+  return [...new Set(value
     .filter((item): item is string => typeof item === 'string')
     .map((item) => item.trim().toLowerCase())
-    .filter(Boolean);
+    .filter(Boolean))];
+}
+
+function cleanAttachments(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => Boolean(item) && typeof item === 'object')
+    .map((item) => ({
+      id: typeof item.id === 'string' ? item.id : '',
+      filename: typeof item.filename === 'string' ? item.filename : 'Attachment',
+      content_type: typeof item.content_type === 'string' ? item.content_type : 'application/octet-stream',
+      size: typeof item.size === 'number' && Number.isFinite(item.size) ? item.size : 0,
+      storage_path: typeof item.storage_path === 'string' ? item.storage_path : '',
+    }))
+    .filter((item) => item.id && item.storage_path);
+}
+
+function sameDraft(a: Record<string, unknown>, b: Record<string, unknown>) {
+  return JSON.stringify({
+    to_addresses: a.to_addresses ?? [],
+    cc_addresses: a.cc_addresses ?? [],
+    bcc_addresses: a.bcc_addresses ?? [],
+    subject: a.subject ?? '',
+    html_body: a.html_body ?? '',
+    text_body: a.text_body ?? '',
+    attachments: a.attachments ?? [],
+  }) === JSON.stringify({
+    to_addresses: b.to_addresses ?? [],
+    cc_addresses: b.cc_addresses ?? [],
+    bcc_addresses: b.bcc_addresses ?? [],
+    subject: b.subject ?? '',
+    html_body: b.html_body ?? '',
+    text_body: b.text_body ?? '',
+    attachments: b.attachments ?? [],
+  });
 }
 
 export async function GET() {
@@ -57,9 +91,26 @@ export async function POST(request: Request) {
       subject: typeof body.subject === 'string' ? body.subject : '',
       html_body: typeof body.html_body === 'string' ? body.html_body : '',
       text_body: typeof body.text_body === 'string' ? body.text_body : '',
+      attachments: cleanAttachments(body.attachments),
     };
 
     const supabase = getSupabaseAdmin();
+    const { data: recentDrafts, error: recentError } = await supabase
+      .from('email_drafts')
+      .select(DRAFT_SELECT)
+      .eq('user_id', auth.user.id)
+      .order('updated_at', { ascending: false })
+      .limit(5);
+    if (recentError) throw recentError;
+
+    const now = Date.now();
+    const duplicate = (recentDrafts ?? []).find((draft) => {
+      const updatedAt = new Date(draft.updated_at).getTime();
+      return Number.isFinite(updatedAt) && now - updatedAt < 10000 && sameDraft(draft as Record<string, unknown>, payload as Record<string, unknown>);
+    });
+
+    if (duplicate) return NextResponse.json({ draft: duplicate, deduplicated: true });
+
     const { data, error } = await supabase
       .from('email_drafts')
       .insert(payload)
@@ -90,6 +141,7 @@ export async function PATCH(request: Request) {
       subject: typeof body.subject === 'string' ? body.subject : '',
       html_body: typeof body.html_body === 'string' ? body.html_body : '',
       text_body: typeof body.text_body === 'string' ? body.text_body : '',
+      attachments: cleanAttachments(body.attachments),
       updated_at: new Date().toISOString(),
     };
 
