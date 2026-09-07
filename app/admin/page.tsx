@@ -77,6 +77,7 @@ export default function AdminPage() {
         <Link href="/admin/capacity" className={styles.primaryButton}>Capacity & Usage</Link>
         <Link href="/admin/incidents" className={styles.primaryButton}>Incidents</Link>
         <Link href="/admin/mailboxes" className={styles.primaryButton}>Mailboxes</Link>
+        <Link href="/admin/users" className={styles.primaryButton}>Users</Link>
       </nav>
 
       <section className={styles.metricGrid}>
