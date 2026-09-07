@@ -11,22 +11,33 @@ const formatTime = (value: string) => {
   catch { return value; }
 };
 
+function isMissingSchema(result: { error?: { code?: string } | null }) {
+  return result.error?.code === 'PGRST205' || result.error?.code === '42P01';
+}
+
 export default async function AdminMonitoringPage() {
   const admin = await requireAdmin();
   const supabase = getSupabaseAdmin();
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  const [events, incidents, reports, inbound, outbound, failures] = await Promise.all([
+  const [events, incidents, reports, inbound, outbound, failures, deliveryRows] = await Promise.all([
     supabase.from('system_events').select('id,event_type,severity,component,action,message,request_id,route,http_status,created_at').gte('created_at', since).order('created_at', { ascending: false }).limit(30),
     supabase.from('incidents').select('id,incident_key,title,severity,status,component,last_seen_at').not('status', 'in', '(resolved,closed)').order('last_seen_at', { ascending: false }).limit(20),
     supabase.from('user_issue_reports').select('id,report_key,mailbox,action,status,description,created_at,incident_id').not('status', 'in', '(resolved,closed)').order('created_at', { ascending: false }).limit(20),
     supabase.from('email_messages').select('id', { count: 'exact', head: true }).eq('direction', 'inbound').gte('created_at', since),
     supabase.from('email_messages').select('id', { count: 'exact', head: true }).eq('direction', 'outbound').gte('created_at', since),
     supabase.from('email_messages').select('id', { count: 'exact', head: true }).eq('direction', 'outbound').neq('status', 'sent').gte('created_at', since),
+    supabase.from('resend_email_events').select('event_type').gte('received_at', since).limit(5000),
   ]);
 
-  const missing = [events, incidents, reports].some((r) => r.error?.code === 'PGRST205' || r.error?.code === '42P01');
-  const hardError = [events, incidents, reports, inbound, outbound, failures].find((r) => r.error && r.error.code !== 'PGRST205' && r.error.code !== '42P01');
+  const missing = [events, incidents, reports].some((r) => isMissingSchema(r));
+  const hardError = [events, incidents, reports, inbound, outbound, failures, deliveryRows].find((r) => r.error && !isMissingSchema(r));
+
+  const deliveryCounts: Record<string, number> = {};
+  for (const row of deliveryRows.data ?? []) {
+    deliveryCounts[row.event_type] = (deliveryCounts[row.event_type] ?? 0) + 1;
+  }
+  const deliveryStoreMissing = isMissingSchema(deliveryRows);
 
   return (
     <main className={styles.shell}>
@@ -42,6 +53,7 @@ export default async function AdminMonitoringPage() {
 
       <section className={styles.healthRow}>
         <span className={`${styles.healthPill} ${missing ? styles.attention : styles.healthy}`}><span /> Monitoring store: {missing ? 'not initialized' : 'connected'}</span>
+        <span className={`${styles.healthPill} ${deliveryStoreMissing ? styles.attention : styles.healthy}`}><span /> Resend delivery store: {deliveryStoreMissing ? 'not initialized' : 'connected'}</span>
         <span className={styles.healthPill}><Clock3 size={12} /> {formatTime(new Date().toISOString())}</span>
       </section>
 
@@ -50,6 +62,19 @@ export default async function AdminMonitoringPage() {
         <div className={styles.metricCard}><AlertTriangle size={18} /><span>Open incidents</span><strong>{incidents.data?.length ?? 0}</strong><small>Detected / investigating / mitigated</small></div>
         <div className={styles.metricCard}><MailWarning size={18} /><span>Outbound failures</span><strong>{failures.count ?? 0}</strong><small>Recent non-sent records</small></div>
         <div className={styles.metricCard}><Database size={18} /><span>Mail flow</span><strong>{(inbound.count ?? 0) + (outbound.count ?? 0)}</strong><small>{inbound.count ?? 0} inbound · {outbound.count ?? 0} outbound</small></div>
+      </section>
+
+      <section className={styles.metricGrid}>
+        <div className={styles.metricCard}><CheckCircle2 size={18} /><span>Delivered</span><strong>{deliveryCounts['email.delivered'] ?? 0}</strong><small>Provider delivery confirmations</small></div>
+        <div className={styles.metricCard}><Clock3 size={18} /><span>Delayed</span><strong>{deliveryCounts['email.delivery_delayed'] ?? 0}</strong><small>Temporary delivery issues</small></div>
+        <div className={styles.metricCard}><AlertTriangle size={18} /><span>Bounced</span><strong>{deliveryCounts['email.bounced'] ?? 0}</strong><small>Permanent recipient failures</small></div>
+        <div className={styles.metricCard}><MailWarning size={18} /><span>Failed</span><strong>{deliveryCounts['email.failed'] ?? 0}</strong><small>Provider send failures</small></div>
+      </section>
+
+      <section className={styles.healthRow}>
+        <span className={`${styles.healthPill} ${(deliveryCounts['email.complained'] ?? 0) > 0 ? styles.attention : styles.healthy}`}><span /> Complaints: {deliveryCounts['email.complained'] ?? 0}</span>
+        <span className={`${styles.healthPill} ${(deliveryCounts['email.suppressed'] ?? 0) > 0 ? styles.attention : styles.healthy}`}><span /> Suppressed: {deliveryCounts['email.suppressed'] ?? 0}</span>
+        <span className={styles.healthPill}>Delivery events: {deliveryRows.data?.length ?? 0}</span>
       </section>
 
       {hardError ? <section className={styles.panel}><div className={styles.empty}><ShieldAlert size={22} /><strong>Monitoring data error</strong><span>{hardError.error?.message}</span></div></section> : null}
