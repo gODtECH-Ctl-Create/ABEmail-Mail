@@ -6,7 +6,7 @@
 
 <p>
   <img src="https://img.shields.io/badge/status-production--oriented-7c3aed?style=for-the-badge" alt="Production-oriented" />
-  <img src="https://img.shields.io/badge/license-MIT-2563eb?style=for-the-badge" alt="MIT License" />
+  <img src="https://img.shields.io/badge/license-proprietary-b91c1c?style=for-the-badge" alt="Proprietary license" />
   <img src="https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 16" />
   <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
   <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
@@ -268,7 +268,7 @@ GMAIL DELIVERABILITY       ██████████░░░░░░░�
 AUTOMATED TEST SUITE       █████░░░░░░░░░░░░░░░  FOLLOW-UP
 WEB PUSH                   ███████████████░░░░░  PARKED
 CLOUDFLARE MIGRATION       ██░░░░░░░░░░░░░░░░░░  FUTURE
-COMMERCIAL LICENSING       ██░░░░░░░░░░░░░░░░░░  FUTURE
+COMMERCIAL LICENSING       ███████████████░░░░░  POLICY NOW ACTIVE
 ```
 
 ### Current branches
@@ -437,7 +437,7 @@ DNS records are organization-specific. Never copy the Waste2Light records into a
 
 ---
 
-## 🏢 Deploying ABEmail for another organization
+## 🏢 Reusing ABEmail for another organization
 
 ABEmail is designed to be reusable as an **isolated organization deployment**.
 
@@ -487,79 +487,77 @@ The application UI and codebase represent the ABEmail product. Organization-spec
 
 ABEmail is intentionally designed as a product, not as an unbranded starter kit.
 
-For official ABE Tech Lab / Waste2Light deployments, the intended policy is:
+For official ABE Tech Lab / Waste2Light deployments, preserve:
 
 ```text
-KEEP THE BRAND.
-KEEP THE UI.
-KEEP THE TERMINOLOGY.
-KEEP THE PRODUCT IDENTITY.
-KEEP THE SECURITY BOUNDARIES.
+THE PRODUCT IDENTITY
+THE ABEMAIL BRAND
+THE USER INTERFACE
+THE INTERACTION MODEL
+THE SECURITY BOUNDARIES
 ```
 
-Do not, without authorization:
+Unless a written Commercial Agreement expressly grants an exception, do not:
 
 - remove ABEmail branding
 - white-label the interface
 - materially redesign the user interface
-- remove copyright or license notices
-- present a modified deployment as an official ABEmail build
-
-### Current legal position
-
-The repository currently carries the **MIT License**, which is permissive and allows modification, redistribution, sublicensing, and commercial use subject to its notice requirements.
-
-Therefore, the branding/UI rules above are currently **product policy and deployment guidance**, not restrictions created by the present MIT license.
-
-Before controlled external commercial distribution, the licensing model should be deliberately replaced with a suitable proprietary or commercial agreement.
+- replace official terminology or product presentation
+- remove copyright, license, or provenance notices
+- present a modified build as an official ABEmail release
 
 ---
 
-## 🧱 Licensing and extreme protection roadmap
+## 🧱 Proprietary licensing & commercial protection
 
-The long-term protection model can be layered rather than relying on one trick:
+ABEmail is now distributed under the **ABEmail Mail Proprietary Software License v1.0**.
+
+The repository is source-available for controlled access, but source visibility does **not** by itself grant operational or commercial rights.
+
+The intended protection model is layered:
 
 ```text
 COPYRIGHT OWNERSHIP
         ↓
-PROPRIETARY / COMMERCIAL LICENSE
+PROPRIETARY SOFTWARE LICENSE
         ↓
-PERMITTED-USE DEFINITION
+WRITTEN COMMERCIAL AGREEMENT
         ↓
-BRAND + UI RESTRICTIONS
+DEPLOYMENT AUTHORIZATION
         ↓
-NO UNAUTHORIZED WHITE-LABELING
+DOMAIN / SEAT / FEATURE ENTITLEMENTS
         ↓
-NO UNAUTHORIZED RESALE / SUBLICENSING
+DEPLOYMENT ID + PROVENANCE
         ↓
-DEPLOYMENT REGISTRATION
-        ↓
-LICENSE ACTIVATION / ENTITLEMENT
-        ↓
-SIGNED RELEASES + PROVENANCE
+SIGNED RELEASES + BUILD METADATA
         ↓
 SOFTWARE BILL OF MATERIALS (SBOM)
         ↓
-COMMERCIAL FEES / ROYALTIES WHERE CONTRACTED
+OPTIONAL LICENSE ACTIVATION
+        ↓
+FEES / SUPPORT / USAGE / ROYALTIES
         ↓
 TERMINATION + BREACH REMEDIES
 ```
 
-Potential technical provenance mechanisms include:
+Potential technical controls include:
 
-- signed releases
-- copyright and provenance markers
-- build metadata
+- deployment-specific license records
+- signed release artifacts
+- source provenance markers
 - Software Bill of Materials (SBOM)
-- version identifiers
+- release checksums
 - deployment identifiers
-- license activation records
-- entitlement/version tracking
-- explicitly disclosed license-validation services
+- entitlement/version records
+- controlled distribution archives
+- explicitly disclosed license activation/validation
+- commercial usage reporting and audit controls
 
-No source-code mechanism can make an identifier literally impossible to remove from a copy that another party fully controls. Likewise, arbitrary independent deployments cannot be reliably discovered without a legitimate observable connection or contractual reporting mechanism.
+No source-level identifier can be guaranteed to be impossible to remove when another party fully controls the source and runtime. The defensible model is therefore **contractual protection plus technical provenance and explicit deployment controls**.
 
-The strongest practical model is **legal protection + controlled distribution + technical provenance + explicit activation and entitlement controls**.
+For maximum control over source distribution, the production source repository should normally be private before external commercial distribution.
+
+See [`LICENSE`](./LICENSE) and [`docs/COMMERCIAL-LICENSING.md`](./docs/COMMERCIAL-LICENSING.md).
 
 ---
 
@@ -567,7 +565,7 @@ The strongest practical model is **legal protection + controlled distribution + 
 
 <a name="security"></a>
 
-ABEmail is designed around layered security boundaries:
+ABEmail uses layered security boundaries:
 
 - Supabase Authentication for identity
 - Server-side authorization for sensitive operations
@@ -576,9 +574,9 @@ ABEmail is designed around layered security boundaries:
 - Server-side privileged database access
 - Signed Resend webhook verification
 - Private attachment storage
-- Admin authorization through a server-side allowlist
+- Server-side Admin authorization
 - Administrative audit logging
-- Incident and monitoring records separated from normal mailbox data
+- Incident and monitoring records separated from mailbox data
 
 The dedicated `feature/security-hardening` branch contains additional unmerged hardening work and should be reviewed before final production sign-off.
 
@@ -588,10 +586,10 @@ The dedicated `feature/security-hardening` branch contains additional unmerged h
 
 The Admin console turns the mail workspace into an operable service rather than only a user interface.
 
-### Monitored signals
+### Signals
 
 - application/system events
-- mail-flow volume
+- mail-flow activity
 - outbound failures
 - Resend delivery events
 - user issue reports
@@ -625,7 +623,7 @@ Current validation priorities:
 [11] Automated test suite + typecheck
 ```
 
-The Web Push notification work is intentionally excluded from this readiness sequence and remains parked on `feature/web-push-v2`.
+Web Push is intentionally excluded from this readiness sequence and remains parked on `feature/web-push-v2`.
 
 ---
 
@@ -643,38 +641,24 @@ proxy.ts                 Request/authentication proxy
 next.config.ts           Next.js configuration
 package.json             Dependencies and scripts
 .env.example             Environment template
-LICENSE                  Current license
+LICENSE                  Current proprietary license
 ```
-
-### README visual assets
-
-The README intentionally uses project-owned animated SVGs:
-
-```text
-docs/assets/abemail-hero.svg
-   ↳ animated hero / product identity
-
-docs/assets/abemail-flow.svg
-   ↳ animated mail transport visualization
-
-docs/assets/abemail-matrix.svg
-   ↳ animated capability matrix
-
-docs/assets/abemail-footer.svg
-   ↳ animated transmission footer
-```
-
-This keeps the more unusual visual treatment close to the repository rather than making the README dependent on a collection of random third-party GIFs.
 
 ---
 
-## 🧩 Documentation map
+## 📖 Documentation map
 
 ```text
 docs/
+├── assets/
+│   ├── abemail-hero.svg
+│   ├── abemail-flow.svg
+│   ├── abemail-matrix.svg
+│   └── abemail-footer.svg
 ├── admin-operations-status.md
 ├── waste2light-admin-plan.md
 ├── security-checklist.md
+├── COMMERCIAL-LICENSING.md
 ├── UI-REFERENCE.md
 └── web-push.md
 ```
@@ -683,19 +667,13 @@ The README is the product and deployment front door. Feature-specific implementa
 
 ---
 
-## ⏸️ Parked work
+## ⏸️ Parked and future work
 
 ### Web Push notifications
 
 Implemented on `feature/web-push-v2`, but intentionally parked.
 
-Do not:
-
-- apply the Web Push database migration
-- configure VAPID (Voluntary Application Server Identification) keys
-- merge the Web Push branch
-
-until notification work is explicitly reactivated.
+Do not apply its migration, configure its VAPID (Voluntary Application Server Identification) keys, or merge the branch until notification work is explicitly reactivated.
 
 ### Cloudflare migration
 
@@ -707,9 +685,9 @@ A possible future product architecture. The current Admin console is specificall
 
 ---
 
-## 🧭 Design philosophy
+## 🌌 Project principle
 
-ABEmail is meant to feel like a real product while staying straightforward to deploy:
+ABEmail is built to feel like a real organization-owned mail system, not a demo inbox.
 
 ```text
 SIMPLE FOR USERS
@@ -723,17 +701,13 @@ EXPLICIT ABOUT SECURITY
 CAREFUL ABOUT PROVENANCE
 ```
 
-The goal is not to recreate a traditional mail-server stack. The goal is to provide a focused organization-owned mail experience with an operational control plane around it.
-
----
-
 <div align="center">
 
 <img src="./docs/assets/abemail-footer.svg" alt="Animated ABEmail transmission footer" width="100%" />
 
 ### ✉️ ABEmail Mail
 
-**Organization-owned. Deployment-ready. Built with intent.**
+**Organization-owned. Deployment-ready. Protected by design.**
 
 <sub>ABE Tech Lab / gODtECH</sub>
 
@@ -743,10 +717,24 @@ The goal is not to recreate a traditional mail-server stack. The goal is to prov
 
 ---
 
-## 📄 License
+## 📜 License
 
-ABEmail Mail currently ships under the **MIT License**. See [`LICENSE`](./LICENSE) for the complete terms.
+**ABEmail Mail Proprietary Software License v1.0**
 
-The current copyright holder named in that file is **Ayo Richard ABE [gODtECH]**.
+Copyright (c) 2026 **Ayo Richard ABE [gODtECH]**. All rights reserved.
 
-For stronger restrictions around branding, white-labeling, modification, commercial reuse, royalties, or deployment entitlements, adopt a separate proprietary/commercial license before external distribution.
+The Software is source-available, proprietary software. No general permission is granted to use, modify, redistribute, sublicense, sell, white-label, or commercially deploy the Software without explicit authorization under the applicable license and Commercial Agreement.
+
+### Legacy licensing notice
+
+Earlier ABEmail revisions were distributed under the MIT License. This proprietary license applies to versions expressly released under it and does not purport to revoke rights already validly granted under earlier MIT-licensed releases.
+
+See [`LICENSE`](./LICENSE) for the complete terms.
+
+---
+
+<div align="center">
+
+`mail.workspace` · `infrastructure` · `operations` · `provenance` · `control`
+
+</div>
