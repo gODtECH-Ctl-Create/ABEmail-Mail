@@ -15,8 +15,8 @@ function isMissingSchema(result: { error?: { code?: string } | null }) {
   return result.error?.code === 'PGRST205' || result.error?.code === '42P01';
 }
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
+function isRecord(value: unknown): Record<string, unknown> | null {
+  return typeof value === 'object' && value !== null ? value as Record<string, unknown> : null;
 }
 
 function healthLabel(healthy: unknown) {
@@ -46,8 +46,8 @@ export default async function AdminMonitoringPage() {
   for (const row of deliveryRows.data ?? []) deliveryCounts[row.event_type] = (deliveryCounts[row.event_type] ?? 0) + 1;
   const deliveryStoreMissing = isMissingSchema(deliveryRows);
 
-  const healthMetadata = isRecord(latestHealth.data?.metadata) ? latestHealth.data.metadata : null;
-  const dnsChecks = isRecord(healthMetadata?.dns) ? healthMetadata.dns : null;
+  const healthMetadata = isRecord(latestHealth.data?.metadata);
+  const dnsChecks = isRecord(healthMetadata?.dns);
   const healthCheckStatus = latestHealth.data?.event_type?.replace('health.check.', '') ?? 'not recorded';
 
   return (
