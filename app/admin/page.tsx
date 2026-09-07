@@ -71,6 +71,13 @@ export default function AdminPage() {
 
       <section className={styles.healthRow}><HealthPill label="App" state={data.health.app} /><HealthPill label="Database" state={data.health.database} /><HealthPill label="Admin" state={data.health.adminAccess} /><HealthPill label="Monitoring store" state={data.health.monitoringStore} /></section>
 
+      <nav aria-label="Operations sections" className={styles.healthRow} style={{ marginTop: 14 }}>
+        <Link href="/admin/monitoring" className={styles.primaryButton}>Monitoring</Link>
+        <Link href="/admin/security" className={styles.primaryButton}>Security</Link>
+        <Link href="/admin/capacity" className={styles.primaryButton}>Capacity & Usage</Link>
+        <Link href="/admin/incidents" className={styles.primaryButton}>Incidents</Link>
+      </nav>
+
       <section className={styles.metricGrid}>
         <div className={styles.metricCard}><Mail size={18} /><span>Inbound mail</span><strong>{data.metrics.inbound}</strong><small>Total received records</small></div>
         <div className={styles.metricCard}><ArrowUpRight size={18} /><span>Outbound mail</span><strong>{data.metrics.outbound}</strong><small>Total sent records</small></div>
