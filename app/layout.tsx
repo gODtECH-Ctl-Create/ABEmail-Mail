@@ -8,6 +8,7 @@ import ReplyForwardController from '@/components/reply-forward-controller';
 import AttachmentsController from '@/components/attachments-controller';
 import SearchNavigator from '@/components/search-navigator';
 import MarkAllRead from '@/components/mark-all-read';
+import ReportIssue from '@/components/report-issue';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <AttachmentsController />
         <SearchNavigator />
         <MarkAllRead />
+        <ReportIssue />
       </body>
     </html>
   );
