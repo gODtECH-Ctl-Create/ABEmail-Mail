@@ -13,9 +13,10 @@
 - Protected incident list/status API with audit logging.
 - Dedicated `/admin/incidents` and `/admin/monitoring` views.
 - Automatic monitoring signals for outbound send success/failure and inbound Resend webhook success/failure.
-- Verified Resend delivery-event ingestion foundation for sent, delivered, delayed, bounced, complained, suppressed and failed events.
-- Idempotent Resend event storage keyed by `svix-id` so webhook retries do not create duplicate delivery records.
-- Provider-status fields on outbound messages for delivery-state visibility.
+- Resend delivery-event ingestion foundation for sent, delivered, delayed, bounced, complained, suppressed and failed events.
+- Idempotent Resend delivery-event storage keyed by `svix-id` so webhook retries do not create duplicate delivery records.
+- Provider-status fields on email messages for delivery-state visibility.
+- Delivery health metrics in the Admin Monitoring view.
 - User-facing `Report a problem` component and safe diagnostic report API.
 - Reports can attach to a matching active incident or create a P3 user-report incident candidate.
 
@@ -37,6 +38,6 @@ The monitoring model is intentionally provider-neutral. Vercel is the current ru
 - Connect existing user error states directly to Report a Problem.
 - Add automated P1-P4 incident thresholds and alert routing rather than opening incidents for every single delivery event.
 - Add deeper Supabase/Vercel health checks and future Cloudflare signals.
-- Add full Email Operations, Infrastructure, Security and Capacity sections.
+- Add full Infrastructure, Security and Capacity sections.
 - Add notification routing for critical Admin incidents.
 - Add Admin actions for mailbox and subscription management.
