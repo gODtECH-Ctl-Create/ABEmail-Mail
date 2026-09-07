@@ -3,11 +3,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bell, X } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { hasWebPushSubscription, registerWebPush } from '@/lib/push-client';
 
-type NotificationPreferences = {
-  browser_notifications: boolean;
-};
-
+type NotificationPreferences = { browser_notifications: boolean };
 type Message = {
   id: string;
   direction: 'inbound' | 'outbound';
@@ -17,13 +15,14 @@ type Message = {
   is_trashed: boolean;
 };
 
-const POLL_INTERVAL_MS = 30_000;
+const POLL_INTERVAL_MS = 15_000;
 const NOTIFICATION_KEY_PREFIX = 'abemail:last-notified:';
 
 export default function NotificationWatcher() {
   const [alert, setAlert] = useState<{ id: string; title: string; body: string } | null>(null);
   const lastSeenAtRef = useRef<string | null>(null);
   const pollingRef = useRef(false);
+  const pushAttemptedRef = useRef(false);
 
   useEffect(() => {
     let mounted = true;
@@ -38,6 +37,17 @@ export default function NotificationWatcher() {
       return Boolean(data?.browser_notifications);
     }
 
+    async function ensurePush(browserEnabled: boolean) {
+      if (!browserEnabled || pushAttemptedRef.current) return false;
+      if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+      pushAttemptedRef.current = true;
+      const subscribed = await hasWebPushSubscription();
+      if (subscribed) return true;
+      const result = await registerWebPush();
+      if (!result.ok) console.warn('Web Push setup:', result.reason);
+      return result.ok;
+    }
+
     async function poll() {
       if (!mounted || pollingRef.current) return;
       pollingRef.current = true;
@@ -50,6 +60,8 @@ export default function NotificationWatcher() {
         if (!user?.id || !email || !email.endsWith('@waste2light.com')) return;
 
         const browserEnabled = await readPreferences(user.id);
+        await ensurePush(browserEnabled);
+
         const response = await fetch('/api/inbox?view=primary', { cache: 'no-store' });
         if (!response.ok) return;
 
@@ -79,23 +91,9 @@ export default function NotificationWatcher() {
           ? `${newest.from_address} · ${newest.subject || '(no subject)'}`
           : `New messages are waiting in your inbox for ${email}.`;
 
-        if (mounted) {
+        if (mounted && document.visibilityState === 'visible') {
           setAlert({ id: newest.id, title, body });
           window.setTimeout(() => setAlert(null), 6500);
-        }
-
-        if (browserEnabled && 'Notification' in window && Notification.permission === 'granted') {
-          const notification = new Notification(title, {
-            body,
-            tag: `abemail-${newest.id}`,
-            icon: '/favicon.ico',
-          });
-
-          notification.onclick = () => {
-            window.focus();
-            window.location.href = '/';
-            notification.close();
-          };
         }
       } catch (error) {
         console.error('notification watcher error', error);
@@ -128,69 +126,13 @@ export default function NotificationWatcher() {
   if (!alert) return null;
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      style={{
-        position: 'fixed',
-        top: 18,
-        right: 18,
-        zIndex: 1000,
-        width: 'min(390px, calc(100vw - 36px))',
-        border: '1px solid rgba(17, 24, 39, 0.12)',
-        borderRadius: 16,
-        background: '#ffffff',
-        boxShadow: '0 18px 50px rgba(15, 23, 42, 0.16)',
-        padding: 14,
-        display: 'flex',
-        gap: 12,
-        alignItems: 'flex-start',
-      }}
-    >
-      <div
-        style={{
-          width: 36,
-          height: 36,
-          borderRadius: 11,
-          display: 'grid',
-          placeItems: 'center',
-          background: '#111827',
-          color: '#ffffff',
-          flex: '0 0 auto',
-        }}
-      >
-        <Bell size={17} />
-      </div>
-      <button
-        type="button"
-        onClick={() => (window.location.href = '/')}
-        style={{
-          border: 0,
-          background: 'transparent',
-          padding: 0,
-          textAlign: 'left',
-          cursor: 'pointer',
-          flex: 1,
-          color: '#111827',
-        }}
-      >
+    <div role="status" aria-live="polite" style={{ position: 'fixed', top: 18, right: 18, zIndex: 1000, width: 'min(390px, calc(100vw - 36px))', border: '1px solid rgba(17, 24, 39, 0.12)', borderRadius: 16, background: '#ffffff', boxShadow: '0 18px 50px rgba(15, 23, 42, 0.16)', padding: 14, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+      <div style={{ width: 36, height: 36, borderRadius: 11, display: 'grid', placeItems: 'center', background: '#111827', color: '#ffffff', flex: '0 0 auto' }}><Bell size={17} /></div>
+      <button type="button" onClick={() => (window.location.href = '/')} style={{ border: 0, background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer', flex: 1, color: '#111827' }}>
         <strong style={{ display: 'block', fontSize: 14, marginBottom: 4 }}>{alert.title}</strong>
         <span style={{ display: 'block', fontSize: 13, lineHeight: 1.45, color: '#4b5563' }}>{alert.body}</span>
       </button>
-      <button
-        type="button"
-        onClick={() => setAlert(null)}
-        aria-label="Dismiss notification"
-        style={{
-          border: 0,
-          background: 'transparent',
-          color: '#6b7280',
-          padding: 4,
-          cursor: 'pointer',
-        }}
-      >
-        <X size={16} />
-      </button>
+      <button type="button" onClick={() => setAlert(null)} aria-label="Dismiss notification" style={{ border: 0, background: 'transparent', color: '#6b7280', padding: 4, cursor: 'pointer' }}><X size={16} /></button>
     </div>
   );
 }
