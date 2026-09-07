@@ -37,10 +37,101 @@ type IncidentInput = {
 
 const safeString = (value: unknown) => (typeof value === 'string' && value.length <= 5000 ? value : undefined);
 
+async function createAdminAlert(input: { incidentId: string; alertKey: string; severity: 'P1' | 'P2' | 'P3' | 'P4'; title: string; message: string }) {
+  try {
+    const supabase = getSupabaseAdmin();
+    await supabase.from('admin_alerts').upsert({
+      incident_id: input.incidentId,
+      alert_key: input.alertKey,
+      severity: input.severity,
+      title: input.title,
+      message: safeString(input.message) ?? input.title,
+      status: 'new',
+    }, { onConflict: 'alert_key', ignoreDuplicates: true });
+  } catch (error) {
+    console.error('admin alert write failed', error);
+  }
+}
+
+async function evaluateAutomaticIncident(event: MonitorEvent) {
+  try {
+    const supabase = getSupabaseAdmin();
+
+    if (event.severity === 'critical') {
+      const incidentKey = `auto.${event.component ?? 'system'}.critical`;
+      const incidentId = await recordIncident({
+        incidentKey,
+        title: `Critical ${event.component ?? 'system'} failure`,
+        severity: 'P1',
+        component: event.component,
+        summary: 'A critical production signal was detected automatically.',
+        eventType: event.eventType,
+        message: event.message,
+        requestId: event.requestId,
+        deploymentId: event.deploymentId,
+        providerEventId: event.providerEventId,
+        metadata: { automatic: true },
+      });
+      if (incidentId) await createAdminAlert({
+        incidentId,
+        alertKey: incidentKey,
+        severity: 'P1',
+        title: `P1: Critical ${event.component ?? 'system'} failure`,
+        message: event.message ?? 'A critical production signal was detected.',
+      });
+      return;
+    }
+
+    if (event.severity !== 'error' && event.severity !== 'warning') return;
+
+    const since = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+    let query = supabase
+      .from('system_events')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', since)
+      .eq('severity', event.severity);
+
+    if (event.component) query = query.eq('component', event.component);
+    if (event.eventType) query = query.eq('event_type', event.eventType);
+
+    const { count } = await query;
+    const threshold = event.severity === 'error' ? 3 : 5;
+    if ((count ?? 0) < threshold) return;
+
+    const severity = event.severity === 'error' ? 'P2' : 'P3';
+    const incidentKey = `auto.${event.component ?? 'system'}.${event.eventType}.burst`;
+    const title = `${event.severity === 'error' ? 'Repeated errors' : 'Repeated warnings'}: ${event.component ?? 'system'}`;
+    const summary = `${count} matching ${event.severity} signals were recorded in the last 10 minutes.`;
+
+    const incidentId = await recordIncident({
+      incidentKey,
+      title,
+      severity,
+      component: event.component,
+      summary,
+      eventType: 'incident.auto_detected',
+      message: summary,
+      requestId: event.requestId,
+      deploymentId: event.deploymentId,
+      metadata: { automatic: true, threshold, observedCount: count, windowMinutes: 10, eventType: event.eventType },
+    });
+
+    if (incidentId) await createAdminAlert({
+      incidentId,
+      alertKey: incidentKey,
+      severity,
+      title: `${severity}: ${title}`,
+      message: summary,
+    });
+  } catch (error) {
+    console.error('automatic incident evaluation failed', error);
+  }
+}
+
 export async function recordSystemEvent(event: MonitorEvent) {
   try {
     const supabase = getSupabaseAdmin();
-    await supabase.from('system_events').insert({
+    const { error } = await supabase.from('system_events').insert({
       event_type: safeString(event.eventType) ?? 'unknown',
       severity: event.severity ?? 'info',
       component: safeString(event.component),
@@ -58,6 +149,7 @@ export async function recordSystemEvent(event: MonitorEvent) {
       duration_ms: event.durationMs ?? null,
       metadata: event.metadata ?? {},
     });
+    if (!error) await evaluateAutomaticIncident(event);
   } catch (error) {
     console.error('monitoring event write failed', error);
   }
