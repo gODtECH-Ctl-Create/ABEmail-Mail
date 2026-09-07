@@ -1,0 +1,70 @@
+# Waste2Light ABE Tech Lab Operations Status
+
+## Current branch
+
+`feature/waste2light-admin-v2`
+
+## Implemented
+
+- Server-side ABE Tech Lab admin allowlist via `ABEMAIL_ADMIN_EMAILS`.
+- Protected `/admin` operations overview.
+- Incident and incident-event data model.
+- Structured system-event model with request, trace, deployment and provider context.
+- Protected incident list/status API with audit logging.
+- Dedicated `/admin/incidents`, `/admin/monitoring`, `/admin/security`, `/admin/capacity`, `/admin/mailboxes`, `/admin/users`, and `/admin/subscription` views.
+- Automatic monitoring signals for outbound send success/failure and inbound Resend webhook success/failure.
+- Resend delivery-event ingestion foundation for sent, delivered, delayed, bounced, complained, suppressed and failed events.
+- Idempotent delivery-event storage keyed by `svix-id` so webhook retries do not create duplicate delivery records.
+- Provider-status fields on email messages for delivery-state visibility.
+- Delivery health metrics in the Admin Monitoring view.
+- User-facing `Report a problem` component and safe diagnostic report API.
+- Reports can attach to a matching active incident or create a P3 user-report incident candidate.
+- Automatic incident detection for critical signals and repeated matching warning/error signals.
+- Deduplicated Admin alert records tied to detected incidents.
+- Admin overview now surfaces new automatic alerts.
+- Scheduled daily health-check endpoint covering Supabase connectivity, Resend domain/API status, required configuration, silent inbound-pipeline stalls, MX, SPF, and DMARC.
+- Vercel daily cron configuration for `/api/cron/health`, protected by `CRON_SECRET`.
+- Admin mailbox operations for viewing mailbox state and enabling/disabling application access, with audit logging.
+- Admin user access view with Waste2Light user listing and protected 24-hour suspend/restore actions; Admin accounts cannot be suspended from the console.
+- Admin subscription view for monthly/yearly pricing, status, currency, start date and renewal date without requiring a payment gateway.
+
+## Not yet production-applied
+
+The Admin database migrations `007_admin_operations.sql`, `008_resend_delivery_events.sql`, and `009_incident_alerts.sql` remain branch-only. Apply them only as part of the approved Admin rollout.
+
+## Provider portability
+
+The monitoring model is intentionally provider-neutral. Vercel is the current runtime source, while Cloudflare DNS/runtime/security/service signals will be added during the future migration.
+
+## Current external configuration requirements
+
+- Add the approved ABE Tech Lab operator email(s) to `ABEMAIL_ADMIN_EMAILS` in the appropriate Vercel environment before using the Admin console.
+- Add a strong `CRON_SECRET` to the production Vercel environment for the scheduled health check.
+- Update the Resend webhook at `https://mail.waste2light.com/api/webhooks/resend` to subscribe to the delivery events needed for monitoring: `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.suppressed`, and `email.failed`.
+
+## Scheduled health-check behavior
+
+The current Vercel Hobby deployment uses a daily cron schedule. The check does not treat normal low email volume as an outage. For inbound processing, it compares the newest message visible through Resend's Receiving API with the newest inbound message stored by ABEmail; it only creates an incident when Resend has a materially newer message that ABEmail has not persisted.
+
+Higher-frequency silent-failure detection will be added through provider-neutral scheduling during the future Cloudflare migration or an external scheduler, without changing the Admin incident model.
+
+## Mailbox operations behavior
+
+Mailbox operations only control application access through the existing `mailboxes.active` field. They do not delete a mailbox or modify Resend/domain routing. Every enable/disable action is recorded in the Admin audit log.
+
+## User access behavior
+
+The Admin user console is for operational access management, not mailbox reassignment. It lists Waste2Light authentication accounts and permits temporary 24-hour suspension or restoration through Supabase Auth. Configured ABE Tech Lab Admin accounts are protected from suspension.
+
+## Subscription behavior
+
+The Admin subscription console stores the commercial record for Waste2Light. It does not process payments. The existing schema is ready for a future Paystack integration through provider and provider-ID fields without requiring a redesign.
+
+## Remaining implementation
+
+- Connect existing user error states directly to Report a Problem.
+- Add deeper Vercel runtime and Supabase usage/health signals.
+- Add future Cloudflare runtime, routing, HTTPS/certificate, Web Application Firewall (WAF), Distributed Denial-of-Service (DDoS), and service-health signals.
+- Add notification routing for critical Admin alerts through Web Push when credentials are configured.
+- Add explicit incident resolution workflow improvements and audit-log viewer.
+- Add final role-boundary, failure-injection, backup/recovery, and production sign-off testing.
