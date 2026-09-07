@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AlertTriangle, ArrowLeft, CheckCircle2, Clock3, ShieldAlert } from 'lucide-react';
 import { requireAdmin } from '@/lib/admin';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
+import IncidentActions from './incident-actions';
 import styles from '../admin.module.css';
 
 const statusLabel: Record<string, string> = {
@@ -33,7 +34,10 @@ export default async function AdminIncidentsPage() {
     <main className={styles.shell}>
       <header className={styles.header}>
         <div>
-          <Link href="/admin" className={styles.primaryButton}><ArrowLeft size={14} /> Overview</Link>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Link href="/admin" className={styles.primaryButton}><ArrowLeft size={14} /> Overview</Link>
+            <Link href="/admin/audit" className={styles.secondaryButton}>Audit log</Link>
+          </div>
           <p className={styles.eyebrow} style={{ marginTop: 18 }}>ABE Tech Lab Operations</p>
           <h1>Incidents</h1>
           <p className={styles.muted}>Detected and manually tracked problems across the Waste2Light deployment.</p>
@@ -64,9 +68,12 @@ export default async function AdminIncidentsPage() {
                 <span>{incident.incident_key} · {incident.component ?? 'system'} · Last seen {formatTime(incident.last_seen_at)}</span>
                 {incident.summary ? <span>{incident.summary}</span> : null}
               </div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <b className={incident.severity === 'P1' ? styles.danger : styles.badge}>{incident.severity}</b>
-                <b className={incident.status === 'resolved' || incident.status === 'closed' ? styles.active : styles.badge}>{statusLabel[incident.status] ?? incident.status}</b>
+              <div style={{ display: 'grid', justifyItems: 'end', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <b className={incident.severity === 'P1' ? styles.danger : styles.badge}>{incident.severity}</b>
+                  <b className={incident.status === 'resolved' || incident.status === 'closed' ? styles.active : styles.badge}>{statusLabel[incident.status] ?? incident.status}</b>
+                </div>
+                <IncidentActions id={incident.id} status={incident.status} />
               </div>
             </div>
           ))
