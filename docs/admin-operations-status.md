@@ -22,6 +22,8 @@
 - Automatic incident detection for critical signals and repeated matching warning/error signals.
 - Deduplicated Admin alert records tied to detected incidents.
 - Admin overview now surfaces new automatic alerts.
+- Scheduled daily health-check endpoint covering Supabase connectivity, Resend domain/API status, required configuration, and silent inbound-pipeline stalls.
+- Vercel daily cron configuration for `/api/cron/health`, protected by `CRON_SECRET`.
 
 ## Not yet production-applied
 
@@ -34,13 +36,19 @@ The monitoring model is intentionally provider-neutral. Vercel is the current ru
 ## Current external configuration requirements
 
 - Add the approved ABE Tech Lab operator email(s) to `ABEMAIL_ADMIN_EMAILS` in the appropriate Vercel environment before using the Admin console.
+- Add a strong `CRON_SECRET` to the production Vercel environment for the scheduled health check.
 - Update the Resend webhook at `https://mail.waste2light.com/api/webhooks/resend` to subscribe to the delivery events needed for monitoring: `email.sent`, `email.delivered`, `email.delivery_delayed`, `email.bounced`, `email.complained`, `email.suppressed`, and `email.failed`.
+
+## Scheduled health-check behavior
+
+The current Vercel Hobby deployment uses a daily cron schedule. The check does not treat normal low email volume as an outage. For inbound processing, it compares the newest message visible through Resend's Receiving API with the newest inbound message stored by ABEmail; it only creates an incident when Resend has a materially newer message that ABEmail has not persisted.
+
+Higher-frequency silent-failure detection will be added through provider-neutral scheduling during the future Cloudflare migration or an external scheduler, without changing the Admin incident model.
 
 ## Remaining implementation
 
 - Connect existing user error states directly to Report a Problem.
-- Add scheduled/health-check based detection for silent failures such as a stalled inbound pipeline.
 - Add deeper Supabase/Vercel health checks and future Cloudflare signals.
 - Add full Infrastructure, Security and Capacity sections.
-- Add notification routing for critical Admin alerts through email/web push.
+- Add notification routing for critical Admin alerts through web push when Web Push credentials are configured.
 - Add Admin actions for mailbox and subscription management.
