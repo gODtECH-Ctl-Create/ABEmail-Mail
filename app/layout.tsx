@@ -5,6 +5,7 @@ import './mail-view.css';
 import '../reply-forward.css';
 import NotificationWatcher from '@/components/notification-watcher';
 import ReplyForwardController from '@/components/reply-forward-controller';
+import AttachmentsController from '@/components/attachments-controller';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         {children}
         <NotificationWatcher />
         <ReplyForwardController />
+        <AttachmentsController />
       </body>
     </html>
   );
