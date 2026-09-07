@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getResend } from '@/lib/resend';
+import { getResend, getMailboxFromAddress } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getSupabaseServer } from '@/lib/supabase-server';
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     const resend = getResend();
     const { data: sent, error: sendError } = await resend.emails.send({
-      from,
+      from: getMailboxFromAddress(from),
       to,
       replyTo: replyTo ? [replyTo] : undefined,
       subject,
