@@ -1,0 +1,1 @@
+Production sync marker for the Contacts navigation deployment. This file is intentionally retained as deployment provenance for the 2026-09-08 production sync.

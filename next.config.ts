@@ -1,4 +1,5 @@
 // Keep the production deployment aligned with the canonical main branch.
+// Production sync marker: Contacts navigation is available from the mailbox shell.
 import type { NextConfig } from 'next';
 
 const securityHeaders = [
