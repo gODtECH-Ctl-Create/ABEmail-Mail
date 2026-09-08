@@ -6,9 +6,11 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 const MAIL_DOMAIN = 'waste2light.com';
 const BUCKET = 'abemail-attachments';
 
-function isAllowedMessage(message: { direction: string; from_address: string; to_addresses: string[] }, userEmail: string) {
-  if (message.direction === 'outbound') return message.from_address.toLowerCase().endsWith(`@${MAIL_DOMAIN}`);
-  return message.to_addresses.some((address) => address.toLowerCase() === userEmail || address.toLowerCase().endsWith(`@${MAIL_DOMAIN}`));
+function isAllowedMessage(message: { direction: string; from_address: string; to_addresses: string[]; created_by: string | null }, userId: string, userEmail: string) {
+  if (message.direction === 'outbound') {
+    return message.created_by === userId || message.from_address.toLowerCase() === userEmail;
+  }
+  return message.to_addresses.some((address) => address.toLowerCase() === userEmail);
 }
 
 export async function GET(request: Request) {
@@ -27,18 +29,18 @@ export async function GET(request: Request) {
     const supabase = getSupabaseAdmin();
     const { data: message, error: messageError } = await supabase
       .from('email_messages')
-      .select('id,resend_email_id,direction,from_address,to_addresses,attachments')
+      .select('id,resend_email_id,direction,from_address,to_addresses,attachments,created_by')
       .eq('id', messageId)
       .maybeSingle();
     if (messageError) throw messageError;
-    if (!message || !isAllowedMessage(message, userEmail)) return NextResponse.json({ error: 'Attachment not found.' }, { status: 404 });
+    if (!message || !isAllowedMessage(message, user.id, userEmail)) return NextResponse.json({ error: 'Attachment not found.' }, { status: 404 });
 
     if (message.direction === 'outbound') {
       const attachment = Array.isArray(message.attachments)
         ? message.attachments.find((item: { id?: unknown; storage_path?: unknown }) => item?.id === attachmentId || item?.storage_path === attachmentId)
         : null;
       const storagePath = typeof attachment?.storage_path === 'string' ? attachment.storage_path : '';
-      if (!storagePath) return NextResponse.json({ error: 'Attachment source unavailable.' }, { status: 404 });
+      if (!storagePath || !storagePath.startsWith(`${user.id}/`)) return NextResponse.json({ error: 'Attachment source unavailable.' }, { status: 404 });
 
       const { data: signed, error: signedError } = await supabase.storage.from(BUCKET).createSignedUrl(storagePath, 300);
       if (signedError || !signed?.signedUrl) return NextResponse.json({ error: 'Unable to prepare attachment.' }, { status: 500 });

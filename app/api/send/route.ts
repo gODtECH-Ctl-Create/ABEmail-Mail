@@ -2,9 +2,13 @@ import { NextResponse } from 'next/server';
 import { getResend, getMailboxFromAddress } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getSupabaseServer } from '@/lib/supabase-server';
+import { consumeRateLimit } from '@/lib/rate-limit';
 import { recordIncident, recordSystemEvent, requestContext } from '@/lib/monitoring';
 
 const MAIL_DOMAIN = 'waste2light.com';
+const MAX_SUBJECT_LENGTH = 998;
+const MAX_HTML_LENGTH = 1_000_000;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: Request) {
   const context = requestContext(request);
@@ -21,9 +25,14 @@ export async function POST(request: Request) {
 
     userId = user.id;
     from = user.email.toLowerCase();
-    if (!from.endsWith(`@${MAIL_DOMAIN}`)) {
-      await recordSystemEvent({ eventType: 'email.send.rejected', severity: 'warning', component: 'email.send', action: 'authorize', message: 'Account is not configured as a Waste2Light mailbox', userId, mailbox: from, ...context, route: '/api/send', httpStatus: 403 });
-      return NextResponse.json({ error: 'Your account is not configured as a Waste2Light mailbox.' }, { status: 403 });
+    if (!from.endsWith(`@${MAIL_DOMAIN}`)) return NextResponse.json({ error: 'Your account is not configured as a Waste2Light mailbox.' }, { status: 403 });
+
+    const limit = await consumeRateLimit(`send:${user.id}`, 30, 60);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: limit.reason === 'limit' ? 'Too many send attempts. Please try again shortly.' : 'Sending is temporarily unavailable.' },
+        { status: limit.reason === 'limit' ? 429 : 503, headers: limit.reason === 'limit' ? { 'Retry-After': '60' } : undefined },
+      );
     }
 
     const body = await request.json();
@@ -33,10 +42,10 @@ export async function POST(request: Request) {
     const replyTo = typeof body.replyTo === 'string' ? body.replyTo.trim().toLowerCase() : undefined;
     const draftId = typeof body.draftId === 'string' ? body.draftId : '';
 
-    if (!to || !subject || !html) {
-      await recordSystemEvent({ eventType: 'email.send.rejected', severity: 'warning', component: 'email.send', action: 'validate', message: 'Required message fields are missing', userId, mailbox: from, ...context, route: '/api/send', httpStatus: 400 });
-      return NextResponse.json({ error: 'To, subject and message are required.' }, { status: 400 });
-    }
+    if (!EMAIL_RE.test(to)) return NextResponse.json({ error: 'Enter a valid recipient email address.' }, { status: 400 });
+    if (!subject || subject.length > MAX_SUBJECT_LENGTH) return NextResponse.json({ error: `Subject must be between 1 and ${MAX_SUBJECT_LENGTH} characters.` }, { status: 400 });
+    if (!html || html.length > MAX_HTML_LENGTH) return NextResponse.json({ error: `Message body must be between 1 byte and ${MAX_HTML_LENGTH} bytes.` }, { status: 400 });
+    if (replyTo && !EMAIL_RE.test(replyTo)) return NextResponse.json({ error: 'Reply-To must be a valid email address.' }, { status: 400 });
 
     const resend = getResend();
     const { data, error } = await resend.emails.send({
@@ -75,19 +84,11 @@ export async function POST(request: Request) {
     }
 
     if (draftId) {
-      const { error: draftDeleteError } = await supabase
-        .from('email_drafts')
-        .delete()
-        .eq('id', draftId)
-        .eq('user_id', user.id);
-      if (draftDeleteError) {
-        console.error('failed to delete sent draft', draftDeleteError);
-        await recordSystemEvent({ eventType: 'draft.delete_after_send.failed', severity: 'warning', component: 'supabase', action: 'delete_draft', message: 'Sent message succeeded but draft cleanup failed', userId, mailbox: from, ...context, route: '/api/send', httpStatus: 500, provider: 'supabase' });
-      }
+      const { error: draftDeleteError } = await supabase.from('email_drafts').delete().eq('id', draftId).eq('user_id', user.id);
+      if (draftDeleteError) console.error('failed to delete sent draft', draftDeleteError);
     }
 
     await recordSystemEvent({ eventType: 'email.sent', severity: 'info', component: 'resend', action: 'send', message: 'Outbound email accepted by provider', userId, mailbox: from, ...context, route: '/api/send', httpStatus: 200, provider: 'resend', providerEventId: data.id, metadata: { recipientCount: 1 } });
-
     return NextResponse.json({ id: data.id });
   } catch (error) {
     console.error('send email error', error);
