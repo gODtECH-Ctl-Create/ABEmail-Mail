@@ -4,8 +4,8 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin';
 
 const MAIL_DOMAIN = 'waste2light.com';
 const MAILBOX_SELECT = 'id,address,display_name,active';
-const MESSAGE_SELECT = 'id,resend_email_id,direction,from_address,to_addresses,subject,html_body,text_body,status,created_at,received_at,message_id,attachments,is_read,is_starred,is_trashed';
-const VIEWS = new Set(['primary', 'all', 'my-sent', 'all-sent', 'starred', 'trash']);
+const MESSAGE_SELECT = 'id,resend_email_id,direction,from_address,to_addresses,subject,html_body,text_body,status,created_at,received_at,message_id,attachments,is_read,is_starred,is_trashed,is_spam';
+const VIEWS = new Set(['primary', 'all', 'my-sent', 'all-sent', 'drafts', 'starred', 'trash', 'spam']);
 
 export async function GET(request: Request) {
   try {
@@ -49,19 +49,21 @@ export async function GET(request: Request) {
       .limit(200);
 
     if (view === 'primary') {
-      query = query.eq('direction', 'inbound').contains('to_addresses', [userEmail]).eq('is_trashed', false);
+      query = query.eq('direction', 'inbound').contains('to_addresses', [userEmail]).eq('is_trashed', false).eq('is_spam', false);
     } else if (view === 'all') {
-      query = query.eq('direction', 'inbound').eq('is_trashed', false);
+      query = query.eq('direction', 'inbound').eq('is_trashed', false).eq('is_spam', false);
       if (mailboxFilter) query = query.contains('to_addresses', [mailboxFilter]);
     } else if (view === 'my-sent') {
-      query = query.eq('direction', 'outbound').eq('from_address', userEmail).eq('is_trashed', false);
+      query = query.eq('direction', 'outbound').eq('from_address', userEmail).eq('is_trashed', false).eq('is_spam', false);
     } else if (view === 'all-sent') {
-      query = query.eq('direction', 'outbound').eq('is_trashed', false);
+      query = query.eq('direction', 'outbound').eq('is_trashed', false).eq('is_spam', false);
       if (mailboxFilter) query = query.eq('from_address', mailboxFilter);
     } else if (view === 'starred') {
-      query = query.eq('is_starred', true).eq('is_trashed', false);
+      query = query.eq('is_starred', true).eq('is_trashed', false).eq('is_spam', false);
     } else if (view === 'trash') {
-      query = query.eq('is_trashed', true);
+      query = query.eq('is_trashed', true).eq('is_spam', false);
+    } else if (view === 'spam') {
+      query = query.eq('is_spam', true).eq('is_trashed', false);
     }
 
     const { data, error } = await query;
