@@ -21,17 +21,19 @@ export async function GET(request: Request) {
     const supabase = getSupabaseAdmin();
     const { data: candidates, error } = await supabase
       .from('email_messages')
-      .select('id,resend_email_id,direction,from_address,to_addresses,subject,text_body,attachments,created_at')
+      .select('id,resend_email_id,direction,from_address,to_addresses,subject,text_body,attachments,created_at,created_by')
       .eq('from_address', from)
       .eq('subject', subject)
       .order('created_at', { ascending: false })
       .limit(20);
     if (error) throw error;
 
-    const accessible = (candidates ?? []).filter((message) =>
-      (message.direction === 'outbound' && message.from_address.endsWith(`@${MAIL_DOMAIN}`)) ||
-      (message.direction === 'inbound' && message.to_addresses.some((address: string) => address.endsWith(`@${MAIL_DOMAIN}`))),
-    );
+    const accessible = (candidates ?? []).filter((message) => {
+      if (message.direction === 'outbound') {
+        return message.created_by === user.id || message.from_address.toLowerCase() === userEmail;
+      }
+      return message.to_addresses.some((address: string) => address.toLowerCase() === userEmail);
+    });
 
     const selected = bodySnippet
       ? accessible.find((message) => (message.text_body ?? '').includes(bodySnippet)) ?? accessible[0]
