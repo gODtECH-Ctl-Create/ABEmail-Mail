@@ -4,11 +4,16 @@ import { getSupabaseServer } from '@/lib/supabase-server';
 
 const MAIL_DOMAIN = 'waste2light.com';
 
+async function getCurrentUser() {
+  const authClient = await getSupabaseServer();
+  const { data: { user } } = await authClient.auth.getUser();
+  const email = user?.email?.toLowerCase() ?? '';
+  return { user, email };
+}
+
 export async function PATCH(request: Request) {
   try {
-    const authClient = await getSupabaseServer();
-    const { data: { user } } = await authClient.auth.getUser();
-    const userEmail = user?.email?.toLowerCase();
+    const { user, email: userEmail } = await getCurrentUser();
 
     if (!user?.id || !userEmail) {
       return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
@@ -24,21 +29,41 @@ export async function PATCH(request: Request) {
 
     if (!id) return NextResponse.json({ error: 'Message ID is required.' }, { status: 400 });
 
+    const supabase = getSupabaseAdmin();
+    const { data: current, error: currentError } = await supabase
+      .from('email_messages')
+      .select('id,direction,created_by,from_address,to_addresses,is_spam,is_trashed,is_read,is_starred')
+      .eq('id', id)
+      .or(`created_by.eq.${user.id},from_address.eq.${userEmail},to_addresses.cs.{${userEmail}}`)
+      .maybeSingle();
+
+    if (currentError) throw currentError;
+    if (!current) return NextResponse.json({ error: 'Message not found.' }, { status: 404 });
+
     const updates: Record<string, boolean> = {};
     if (action === 'read') updates.is_read = true;
     else if (action === 'unread') updates.is_read = false;
     else if (action === 'star') updates.is_starred = true;
     else if (action === 'unstar') updates.is_starred = false;
-    else if (action === 'trash') updates.is_trashed = true;
-    else if (action === 'restore') updates.is_trashed = false;
-    else return NextResponse.json({ error: 'Unsupported message action.' }, { status: 400 });
+    else if (action === 'spam') {
+      if (current.direction !== 'inbound') return NextResponse.json({ error: 'Only inbound messages can be marked as spam.' }, { status: 400 });
+      updates.is_spam = true;
+      updates.is_trashed = false;
+    } else if (action === 'notspam') {
+      updates.is_spam = false;
+      updates.is_trashed = false;
+    } else if (action === 'trash') {
+      updates.is_trashed = true;
+      updates.is_spam = false;
+    } else if (action === 'restore') {
+      updates.is_trashed = false;
+    } else return NextResponse.json({ error: 'Unsupported message action.' }, { status: 400 });
 
-    const supabase = getSupabaseAdmin();
     const { data: message, error: updateError } = await supabase
       .from('email_messages')
       .update(updates)
       .eq('id', id)
-      .select('id,is_read,is_starred,is_trashed')
+      .select('id,is_read,is_starred,is_trashed,is_spam')
       .maybeSingle();
 
     if (updateError) throw updateError;
@@ -53,9 +78,7 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
-    const authClient = await getSupabaseServer();
-    const { data: { user } } = await authClient.auth.getUser();
-    const userEmail = user?.email?.toLowerCase();
+    const { user, email: userEmail } = await getCurrentUser();
 
     if (!user?.id || !userEmail) {
       return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
@@ -70,6 +93,16 @@ export async function DELETE(request: Request) {
     if (!id) return NextResponse.json({ error: 'Message ID is required.' }, { status: 400 });
 
     const supabase = getSupabaseAdmin();
+    const { data: message, error: findError } = await supabase
+      .from('email_messages')
+      .select('id')
+      .eq('id', id)
+      .or(`created_by.eq.${user.id},from_address.eq.${userEmail},to_addresses.cs.{${userEmail}}`)
+      .maybeSingle();
+
+    if (findError) throw findError;
+    if (!message) return NextResponse.json({ error: 'Message not found.' }, { status: 404 });
+
     const { error } = await supabase.from('email_messages').delete().eq('id', id);
     if (error) throw error;
 

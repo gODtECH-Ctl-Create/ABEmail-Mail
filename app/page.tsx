@@ -15,6 +15,7 @@ import {
   Search,
   Send,
   Settings,
+  ShieldAlert,
   Star,
   Trash2,
   Undo2,
@@ -22,7 +23,7 @@ import {
 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 
-type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent' | 'drafts' | 'starred' | 'trash';
+type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent' | 'drafts' | 'starred' | 'trash' | 'spam';
 
 type Mailbox = { id: string; address: string; display_name: string | null; active: boolean };
 
@@ -39,6 +40,7 @@ type Message = {
   is_read: boolean;
   is_starred: boolean;
   is_trashed: boolean;
+  is_spam: boolean;
 };
 
 type Draft = {
@@ -65,6 +67,7 @@ const viewMeta: Record<ViewKey, { title: string; eyebrow: string; description: s
   drafts: { title: 'Drafts', eyebrow: 'Mail', description: 'Messages you started and have not sent yet.' },
   starred: { title: 'Starred', eyebrow: 'Mail', description: 'Messages you marked for quick access.' },
   trash: { title: 'Trash', eyebrow: 'Mail', description: 'Messages moved out of your active mailboxes.' },
+  spam: { title: 'Spam', eyebrow: 'Mail', description: 'Messages you marked as unwanted.' },
 };
 
 export default function Home() {
@@ -170,7 +173,7 @@ export default function Home() {
     setSelected(null);
   }
 
-  async function updateMessageState(id: string, action: 'read' | 'unread' | 'star' | 'unstar' | 'trash' | 'restore') {
+  async function updateMessageState(id: string, action: 'read' | 'unread' | 'star' | 'unstar' | 'spam' | 'notspam' | 'trash' | 'restore') {
     if (actionBusy) return;
     setActionBusy(true);
     try {
@@ -181,18 +184,20 @@ export default function Home() {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? 'Unable to update message.');
-      const changed = data.message as Pick<Message, 'id' | 'is_read' | 'is_starred' | 'is_trashed'>;
+      const changed = data.message as Pick<Message, 'id' | 'is_read' | 'is_starred' | 'is_trashed' | 'is_spam'>;
       setMessages((current) => current
         .map((message) => message.id === id ? { ...message, ...changed } : message)
         .filter((message) => {
+          if (view === 'spam') return action === 'notspam' ? message.id !== id : message.is_spam;
           if (view === 'trash') return action === 'restore' ? message.id !== id : true;
+          if (action === 'spam' && message.id === id) return false;
           if (action === 'trash' && message.id === id) return false;
           if (view === 'starred' && action === 'unstar' && message.id === id) return false;
           return true;
         }));
       if (selected?.id === id) {
         const updated = { ...selected, ...changed };
-        if ((action === 'trash' && view !== 'trash') || (view === 'starred' && action === 'unstar') || (view === 'trash' && action === 'restore')) {
+        if ((action === 'trash' && view !== 'trash') || (action === 'spam' && view !== 'spam') || (action === 'notspam' && view === 'spam') || (view === 'starred' && action === 'unstar') || (view === 'trash' && action === 'restore')) {
           setSelected(null);
         } else {
           setSelected(updated);
@@ -292,6 +297,9 @@ export default function Home() {
           <button type="button" className={`nav-item nav-subitem ${view === 'trash' ? 'active' : ''}`} onClick={() => chooseView('trash')}>
             <Trash2 size={16} /><span>Trash</span>
           </button>
+          <button type="button" className={`nav-item nav-subitem ${view === 'spam' ? 'active' : ''}`} onClick={() => chooseView('spam')}>
+            <ShieldAlert size={16} /><span>Spam</span>
+          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -351,7 +359,7 @@ export default function Home() {
               </article>;
             })}
 
-            {!loading && !error && noContent && <div className="empty-state"><div className="empty-icon"><Mail size={25} /></div><strong>{query ? `No ${view === 'drafts' ? 'drafts' : 'messages'} match your search` : `${meta.title} is empty`}</strong><span>{query ? 'Try a different sender, subject, or keyword.' : view === 'primary' ? `Messages sent to ${currentUserEmail} will appear here.` : view === 'drafts' ? 'Drafts you start composing will appear here automatically.' : view === 'starred' ? 'Star a message to keep it here.' : view === 'trash' ? 'Deleted messages will appear here until permanently removed.' : hasMailboxFilter ? `No messages for ${activeMailboxLabel.toLowerCase()}.` : 'Messages for your company mailboxes will appear here.'}</span>{!query && (view === 'primary' || view === 'my-sent' || view === 'drafts') && <button type="button" className="ghost-action" onClick={() => openCompose()}>Compose a message</button>}</div>}
+            {!loading && !error && noContent && <div className="empty-state"><div className="empty-icon"><Mail size={25} /></div><strong>{query ? `No ${view === 'drafts' ? 'drafts' : 'messages'} match your search` : `${meta.title} is empty`}</strong><span>{query ? 'Try a different sender, subject, or keyword.' : view === 'primary' ? `Messages sent to ${currentUserEmail} will appear here.` : view === 'drafts' ? 'Drafts you start composing will appear here automatically.' : view === 'starred' ? 'Star a message to keep it here.' : view === 'trash' ? 'Deleted messages will appear here until permanently removed.' : view === 'spam' ? 'Messages marked as Spam will appear here.' : hasMailboxFilter ? `No messages for ${activeMailboxLabel.toLowerCase()}.` : 'Messages for your company mailboxes will appear here.'}</span>{!query && (view === 'primary' || view === 'my-sent' || view === 'drafts') && <button type="button" className="ghost-action" onClick={() => openCompose()}>Compose a message</button>}</div>}
           </div>
 
           <section className="message-detail" aria-label="Email reading pane">
@@ -359,8 +367,10 @@ export default function Home() {
               {selected ? <button className="icon-button mobile-back" type="button" onClick={() => setSelected(null)} aria-label="Back to message list"><ArrowLeft size={19} /></button> : <span />}
               <div className="detail-actions">
                 {selected && <button className="icon-button" type="button" aria-label={selected.is_starred ? 'Remove star' : 'Star message'} disabled={actionBusy} onClick={() => updateMessageState(selected.id, selected.is_starred ? 'unstar' : 'star')}><Star size={17} fill={selected.is_starred ? 'currentColor' : 'none'} /></button>}
+                {selected && selected.is_spam && <button className="icon-button" type="button" aria-label="Mark as Not Spam" disabled={actionBusy} onClick={() => updateMessageState(selected.id, 'notspam')}><Mail size={17} /></button>}
+                {selected && selected.direction === 'inbound' && !selected.is_spam && !selected.is_trashed && <button className="icon-button" type="button" aria-label="Mark as Spam" disabled={actionBusy} onClick={() => updateMessageState(selected.id, 'spam')}><ShieldAlert size={17} /></button>}
                 {selected && selected.is_trashed && <button className="icon-button" type="button" aria-label="Restore message" disabled={actionBusy} onClick={() => updateMessageState(selected.id, 'restore')}><Undo2 size={17} /></button>}
-                {selected && !selected.is_trashed && <button className="icon-button" type="button" aria-label="Move to trash" disabled={actionBusy} onClick={() => updateMessageState(selected.id, 'trash')}><Trash2 size={17} /></button>}
+                {selected && !selected.is_trashed && !selected.is_spam && <button className="icon-button" type="button" aria-label="Move to trash" disabled={actionBusy} onClick={() => updateMessageState(selected.id, 'trash')}><Trash2 size={17} /></button>}
                 {selected && selected.is_trashed && <button className="icon-button" type="button" aria-label="Permanently delete message" disabled={actionBusy} onClick={() => permanentlyDelete(selected.id)}><Trash2 size={17} /></button>}
                 {selected && <button className="icon-button" type="button" aria-label={selected.is_read ? 'Mark unread' : 'Mark read'} disabled={actionBusy} onClick={() => updateMessageState(selected.id, selected.is_read ? 'unread' : 'read')}><Mail size={17} /></button>}
               </div>
