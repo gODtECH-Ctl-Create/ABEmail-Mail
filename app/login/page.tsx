@@ -4,6 +4,12 @@ import { FormEvent, useState } from 'react';
 import { ArrowRight, LockKeyhole, Mail } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 
+function getSafeRedirect() {
+  const requested = new URLSearchParams(window.location.search).get('next');
+  if (!requested || !requested.startsWith('/') || requested.startsWith('//')) return '/';
+  return requested;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +28,7 @@ export default function LoginPage() {
       return;
     }
 
-    window.location.href = '/';
+    window.location.href = getSafeRedirect();
   }
 
   return (
