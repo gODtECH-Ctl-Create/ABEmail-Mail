@@ -52,7 +52,7 @@ export default function AdminPage() {
         <div className={styles.gateCard}>
           <div className={styles.brandMark}>AB</div>
           <p className={styles.eyebrow}>ABE Tech Lab Operations</p>
-          {status === 0 ? <><h1>Loading operations console</h1><p>Checking your admin access…</p></> : <><h1>{status === 401 ? 'Admin sign-in required' : 'Admin access required'}</h1><p>{error}</p><Link href="/login" className={styles.primaryButton}>Go to sign in</Link></>}
+          {status === 0 ? <><h1>Loading operations console</h1><p>Checking your admin access…</p></> : <><h1>{status === 401 ? 'Admin sign-in required' : 'Admin access required'}</h1><p>{error}</p><Link href="/login?next=%2Fadmin" className={styles.primaryButton}>Go to sign in</Link></>}
         </div>
       </main>
     );
