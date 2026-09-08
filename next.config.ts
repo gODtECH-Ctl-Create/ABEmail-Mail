@@ -1,3 +1,4 @@
+// Keep the production deployment aligned with the canonical main branch.
 import type { NextConfig } from 'next';
 
 const securityHeaders = [
