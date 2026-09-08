@@ -9,6 +9,7 @@ import AttachmentsController from '@/components/attachments-controller';
 import SearchNavigator from '@/components/search-navigator';
 import MarkAllRead from '@/components/mark-all-read';
 import ReportIssue from '@/components/report-issue';
+import ContactsBridge from '@/components/contacts-bridge';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
@@ -26,6 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <SearchNavigator />
         <MarkAllRead />
         <ReportIssue />
+        <ContactsBridge />
       </body>
     </html>
   );
