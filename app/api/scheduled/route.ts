@@ -7,6 +7,7 @@ const MAX_RECIPIENTS = 20;
 const MAX_DAYS_AHEAD = 90;
 
 type ScheduledStatus = 'pending' | 'processing' | 'sent' | 'cancelled' | 'failed';
+type ScheduledAttachment = { filename: string; content_type: string; size: number; storage_path: string };
 
 function cleanAddresses(value: unknown) {
   if (!Array.isArray(value)) return [];
@@ -20,6 +21,18 @@ function parseScheduledAt(value: unknown) {
   if (typeof value !== 'string') return null;
   const timestamp = Date.parse(value);
   return Number.isFinite(timestamp) ? new Date(timestamp) : null;
+}
+
+function normalizeAttachments(value: unknown): ScheduledAttachment[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
+    .map((item) => ({
+      filename: typeof item.filename === 'string' ? item.filename.slice(0, 180) : 'attachment',
+      content_type: typeof item.contentType === 'string' ? item.contentType : typeof item.content_type === 'string' ? item.content_type : 'application/octet-stream',
+      size: typeof item.size === 'number' && Number.isFinite(item.size) ? item.size : 0,
+      storage_path: typeof item.storage_path === 'string' ? item.storage_path : typeof item.path === 'string' ? item.path : '',
+    }));
 }
 
 function isOwnedAttachmentPath(path: string, userId: string) {
@@ -70,7 +83,7 @@ export async function POST(request: Request) {
     const html = typeof body.html_body === 'string' ? body.html_body : typeof body.html === 'string' ? body.html : '';
     const text = typeof body.text_body === 'string' ? body.text_body : '';
     const scheduledAt = parseScheduledAt(body.scheduled_at);
-    const rawAttachments = Array.isArray(body.attachments) ? body.attachments : [];
+    const attachments = normalizeAttachments(body.attachments);
 
     if (!to.length || !subject || !html) return NextResponse.json({ error: 'At least one recipient, subject and message are required.' }, { status: 400 });
     if (allRecipients.length > MAX_RECIPIENTS) return NextResponse.json({ error: `A scheduled message can have up to ${MAX_RECIPIENTS} recipients.` }, { status: 400 });
@@ -80,15 +93,6 @@ export async function POST(request: Request) {
     const scheduledTimestamp = scheduledAt.getTime();
     if (scheduledTimestamp <= now + 30_000) return NextResponse.json({ error: 'Choose a scheduled time at least 30 seconds in the future.' }, { status: 400 });
     if (scheduledTimestamp > now + MAX_DAYS_AHEAD * 24 * 60 * 60 * 1000) return NextResponse.json({ error: `Messages can be scheduled up to ${MAX_DAYS_AHEAD} days ahead.` }, { status: 400 });
-
-    const attachments = rawAttachments
-      .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
-      .map((item) => ({
-        filename: typeof item.filename === 'string' ? item.filename.slice(0, 180) : 'attachment',
-        content_type: typeof item.contentType === 'string' ? item.contentType : typeof item.content_type === 'string' ? item.content_type : 'application/octet-stream',
-        size: typeof item.size === 'number' && Number.isFinite(item.size) ? item.size : 0,
-        storage_path: typeof item.storage_path === 'string' ? item.storage_path : typeof item.path === 'string' ? item.path : '',
-      }));
 
     if (attachments.some((attachment) => !attachment.storage_path || !isOwnedAttachmentPath(attachment.storage_path, user.id))) {
       return NextResponse.json({ error: 'Invalid attachment reference.' }, { status: 400 });
@@ -187,15 +191,7 @@ export async function PATCH(request: Request) {
     }
     if ('text_body' in body) updates.text_body = typeof body.text_body === 'string' ? body.text_body : '';
     if ('attachments' in body) {
-      if (!Array.isArray(body.attachments)) return NextResponse.json({ error: 'Attachments must be an array.' }, { status: 400 });
-      const attachments = body.attachments
-        .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
-        .map((item) => ({
-          filename: typeof item.filename === 'string' ? item.filename.slice(0, 180) : 'attachment',
-          content_type: typeof item.content_type === 'string' ? item.content_type : 'application/octet-stream',
-          size: typeof item.size === 'number' && Number.isFinite(item.size) ? item.size : 0,
-          storage_path: typeof item.storage_path === 'string' ? item.storage_path : '',
-        }));
+      const attachments = normalizeAttachments(body.attachments);
       if (attachments.some((attachment) => !attachment.storage_path || !isOwnedAttachmentPath(attachment.storage_path, user.id))) return NextResponse.json({ error: 'Invalid attachment reference.' }, { status: 400 });
       updates.attachments = attachments;
     }
@@ -246,3 +242,5 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'Unable to delete the scheduled message.' }, { status: 500 });
   }
 }
+
+export type { ScheduledStatus };
