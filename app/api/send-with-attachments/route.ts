@@ -2,12 +2,17 @@ import { NextResponse } from 'next/server';
 import { getResend, getMailboxFromAddress } from '@/lib/resend';
 import { getSupabaseAdmin } from '@/lib/supabase-admin';
 import { getSupabaseServer } from '@/lib/supabase-server';
+import { consumeRateLimit } from '@/lib/rate-limit';
 
 const MAIL_DOMAIN = 'waste2light.com';
 const MAX_FILES = 10;
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 const MAX_TOTAL_SIZE = 35 * 1024 * 1024;
+const MAX_RECIPIENTS = 50;
+const MAX_SUBJECT_LENGTH = 998;
+const MAX_HTML_LENGTH = 1_000_000;
 const BUCKET = 'abemail-attachments';
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type AttachmentInput = {
   path?: unknown;
@@ -36,13 +41,24 @@ export async function POST(request: Request) {
     if (!user?.id || !from) return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
     if (!from.endsWith(`@${MAIL_DOMAIN}`)) return NextResponse.json({ error: 'Your account is not configured as a Waste2Light mailbox.' }, { status: 403 });
 
+    const limit = await consumeRateLimit(`send-attachments:${user.id}`, 10, 60);
+    if (!limit.allowed) {
+      return NextResponse.json(
+        { error: limit.reason === 'limit' ? 'Too many attachment send attempts. Please try again shortly.' : 'Sending is temporarily unavailable.' },
+        { status: limit.reason === 'limit' ? 429 : 503, headers: limit.reason === 'limit' ? { 'Retry-After': '60' } : undefined },
+      );
+    }
+
     const body = await request.json();
     const to = cleanAddresses(body.to);
     const subject = typeof body.subject === 'string' ? body.subject.trim() : '';
     const html = typeof body.html === 'string' ? body.html : '';
     const attachments = Array.isArray(body.attachments) ? body.attachments as AttachmentInput[] : [];
 
-    if (!to.length || !subject || !html) return NextResponse.json({ error: 'To, subject and message are required.' }, { status: 400 });
+    if (!to.length || to.length > MAX_RECIPIENTS) return NextResponse.json({ error: `Provide between 1 and ${MAX_RECIPIENTS} recipients.` }, { status: 400 });
+    if (to.some((address) => !EMAIL_RE.test(address))) return NextResponse.json({ error: 'Every recipient must be a valid email address.' }, { status: 400 });
+    if (!subject || subject.length > MAX_SUBJECT_LENGTH) return NextResponse.json({ error: `Subject must be between 1 and ${MAX_SUBJECT_LENGTH} characters.` }, { status: 400 });
+    if (!html || html.length > MAX_HTML_LENGTH) return NextResponse.json({ error: `Message body must be between 1 byte and ${MAX_HTML_LENGTH} bytes.` }, { status: 400 });
     if (attachments.length < 1 || attachments.length > MAX_FILES) return NextResponse.json({ error: `Attach between 1 and ${MAX_FILES} files.` }, { status: 400 });
 
     const supabase = getSupabaseAdmin();
@@ -56,7 +72,7 @@ export async function POST(request: Request) {
       const declaredSize = typeof item.size === 'number' && Number.isFinite(item.size) ? item.size : 0;
 
       if (!path || !path.startsWith(`${user.id}/`)) return NextResponse.json({ error: 'Invalid attachment reference.' }, { status: 400 });
-      if (declaredSize > MAX_FILE_SIZE) return NextResponse.json({ error: `${filename} exceeds the 20 MB file limit.` }, { status: 413 });
+      if (declaredSize < 0 || declaredSize > MAX_FILE_SIZE) return NextResponse.json({ error: `${filename} has an invalid file size.` }, { status: 413 });
 
       const { data: file, error: downloadError } = await supabase.storage.from(BUCKET).download(path);
       if (downloadError || !file) return NextResponse.json({ error: `Unable to read ${filename}.` }, { status: 400 });
