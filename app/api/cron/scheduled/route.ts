@@ -5,6 +5,7 @@ import { recordIncident, recordSystemEvent } from '@/lib/monitoring';
 
 const MAX_BATCH = 20;
 const MAX_ATTEMPTS = 3;
+const PROCESSING_LEASE_MINUTES = 15;
 const BUCKET = 'abemail-attachments';
 const MAIL_DOMAIN = 'waste2light.com';
 
@@ -126,6 +127,22 @@ export async function GET(request: Request) {
 
   const supabase = getSupabaseAdmin();
   const now = new Date().toISOString();
+  const staleBefore = new Date(Date.now() - PROCESSING_LEASE_MINUTES * 60 * 1000).toISOString();
+
+  // A serverless invocation can stop after claiming a row but before it updates
+  // the final state. Return abandoned claims to the queue. Resend's stable
+  // idempotency key prevents the same scheduled row from being submitted twice
+  // when a prior provider request already succeeded.
+  const { error: recoveryError } = await supabase
+    .from('scheduled_messages')
+    .update({ status: 'pending', updated_at: now, last_error: 'Recovered after an interrupted scheduler run.' })
+    .eq('status', 'processing')
+    .lt('updated_at', staleBefore);
+
+  if (recoveryError) {
+    return NextResponse.json({ ok: false, error: 'Unable to recover interrupted scheduled messages.' }, { status: 500 });
+  }
+
   const { data: candidates, error } = await supabase
     .from('scheduled_messages')
     .select('*')
