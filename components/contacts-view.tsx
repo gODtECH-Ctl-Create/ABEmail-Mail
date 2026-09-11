@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useCallback, useEffect, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { BookUser, PenLine, Plus, Search, Trash2, X } from 'lucide-react';
 
 type Contact = {
@@ -43,6 +43,28 @@ function initials(value: string) {
     .join('') || 'CT';
 }
 
+function normalizeContacts(value: unknown): Contact[] {
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) => {
+    if (!item || typeof item !== 'object') return [];
+    const contact = item as Record<string, unknown>;
+    if (typeof contact.id !== 'string' || typeof contact.name !== 'string' || typeof contact.email !== 'string') return [];
+
+    return [{
+      id: contact.id,
+      name: contact.name,
+      email: contact.email,
+      company: typeof contact.company === 'string' ? contact.company : null,
+      phone: typeof contact.phone === 'string' ? contact.phone : null,
+      notes: typeof contact.notes === 'string' ? contact.notes : null,
+      tags: Array.isArray(contact.tags) ? contact.tags.filter((tag): tag is string => typeof tag === 'string') : [],
+      created_at: typeof contact.created_at === 'string' ? contact.created_at : '',
+      updated_at: typeof contact.updated_at === 'string' ? contact.updated_at : '',
+    }];
+  });
+}
+
 export default function ContactsView({ onCompose }: { onCompose: (email: string) => void }) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [query, setQuery] = useState('');
@@ -53,32 +75,41 @@ export default function ContactsView({ onCompose }: { onCompose: (email: string)
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 
-  const loadContacts = useCallback(async (search = '') => {
-    setLoading(true);
-    setError('');
-    try {
-      const response = await fetch(`/api/contacts${search ? `?q=${encodeURIComponent(search)}` : ''}`, { cache: 'no-store' });
-      const data = await response.json();
-      if (response.status === 401) {
-        window.location.href = '/login';
-        return;
-      }
-      if (!response.ok) throw new Error(data.error ?? 'Unable to load contacts.');
-      setContacts(Array.isArray(data.contacts) ? data.contacts : []);
-    } catch (loadError) {
-      console.error(loadError);
-      setError('Unable to load contacts right now.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      void loadContacts(query.trim());
-    }, query.trim() ? 250 : 0);
-    return () => window.clearTimeout(timer);
-  }, [query, loadContacts]);
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const search = query.trim();
+        const response = await fetch(`/api/contacts${search ? `?q=${encodeURIComponent(search)}` : ''}`, {
+          cache: 'no-store',
+          signal: controller.signal,
+        });
+        const data = await response.json();
+
+        if (response.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        if (!response.ok) throw new Error(data.error ?? 'Unable to load contacts.');
+
+        setContacts(normalizeContacts(data.contacts));
+      } catch (loadError) {
+        if (loadError instanceof DOMException && loadError.name === 'AbortError') return;
+        console.error(loadError);
+        setError('Unable to load contacts right now.');
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }, query.trim() ? 180 : 0);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [query]);
 
   function openAddContact() {
     setForm(emptyForm);
@@ -117,7 +148,8 @@ export default function ContactsView({ onCompose }: { onCompose: (email: string)
 
       setModalOpen(false);
       setStatus('Contact saved.');
-      await loadContacts(query.trim());
+      setQuery('');
+      setContacts((current) => normalizeContacts([data.contact, ...current]));
     } catch (saveError) {
       console.error(saveError);
       setError(saveError instanceof Error ? saveError.message : 'Unable to save contact.');
