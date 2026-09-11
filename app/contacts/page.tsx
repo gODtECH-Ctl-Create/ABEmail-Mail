@@ -1,1 +1,1 @@
-// RESTORE_REQUIRED
+/* Temporary recovery marker */
