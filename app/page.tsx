@@ -359,6 +359,9 @@ export default function Home() {
           <button type="button" className={`nav-item nav-subitem ${view === 'scheduled' ? 'active' : ''}`} onClick={() => chooseView('scheduled')}>
             <CalendarClock size={16} /><span>Scheduled</span>
           </button>
+          <button type="button" className="nav-item nav-subitem" onClick={() => { window.location.href = '/signatures'; }}>
+            <PenLine size={16} /><span>Signatures</span>
+          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -636,7 +639,24 @@ function Compose({ seed, onClose, onDraftDeleted, onSent, onScheduled }: { seed:
   const [scheduledAt, setScheduledAt] = useState(localInputValue(new Date(Date.now() + 60 * 60 * 1000)));
 
   useEffect(() => {
+    let cancelled = false;
     setTo(seed.to ?? ''); setSubject(seed.subject ?? ''); setBody(seed.body ?? ''); setDraftId(seed.draftId ?? ''); setStatus(''); setScheduleOpen(false); setScheduledAt(localInputValue(new Date(Date.now() + 60 * 60 * 1000)));
+
+    const isNewBlankMessage = !seed.draftId && !seed.to && !seed.subject && !seed.body;
+    if (isNewBlankMessage) {
+      void fetch('/api/signatures', { cache: 'no-store' })
+        .then(async (response) => response.ok ? response.json() : null)
+        .then((data) => {
+          if (cancelled || !data) return;
+          const signature = Array.isArray(data.signatures)
+            ? data.signatures.find((item: { enabled?: boolean; is_default?: boolean }) => item.enabled && item.is_default)
+            : null;
+          if (signature?.text_body) setBody((current) => current || `\n\n-- \n${signature.text_body}`);
+        })
+        .catch(() => null);
+    }
+
+    return () => { cancelled = true; };
   }, [seed.draftId, seed.to, seed.subject, seed.body]);
 
   useEffect(() => {
