@@ -11,6 +11,7 @@ import SearchNavigator from '@/components/search-navigator';
 import MarkAllRead from '@/components/mark-all-read';
 import ReportIssue from '@/components/report-issue';
 import ContactsBridge from '@/components/contacts-bridge';
+import SignatureController from '@/components/signature-controller';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <MarkAllRead />
         <ReportIssue />
         <ContactsBridge />
+        <SignatureController />
       </body>
     </html>
   );
