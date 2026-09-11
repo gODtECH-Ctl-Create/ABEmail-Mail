@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
+  BookUser,
   CalendarClock,
   FileText,
   Forward,
@@ -23,8 +24,9 @@ import {
   X,
 } from 'lucide-react';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import ContactsView from '@/components/contacts-view';
 
-type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent' | 'drafts' | 'starred' | 'trash' | 'spam' | 'scheduled';
+type ViewKey = 'primary' | 'all' | 'my-sent' | 'all-sent' | 'drafts' | 'starred' | 'trash' | 'spam' | 'scheduled' | 'contacts';
 
 type Mailbox = { id: string; address: string; display_name: string | null; active: boolean };
 
@@ -90,7 +92,12 @@ const viewMeta: Record<ViewKey, { title: string; eyebrow: string; description: s
   trash: { title: 'Trash', eyebrow: 'Mail', description: 'Messages moved out of your active mailboxes.' },
   spam: { title: 'Spam', eyebrow: 'Mail', description: 'Messages you marked as unwanted.' },
   scheduled: { title: 'Scheduled Messages', eyebrow: 'Mail', description: 'Messages waiting to be sent automatically later.' },
+  contacts: { title: 'Contacts', eyebrow: 'Business', description: 'Your private address book for faster, more personal email.' },
 };
+
+function isViewKey(value: string | null): value is ViewKey {
+  return value === 'primary' || value === 'all' || value === 'my-sent' || value === 'all-sent' || value === 'drafts' || value === 'starred' || value === 'trash' || value === 'spam' || value === 'scheduled' || value === 'contacts';
+}
 
 function localInputValue(value: string | Date) {
   const date = value instanceof Date ? value : new Date(value);
@@ -124,7 +131,7 @@ export default function Home() {
 
   useEffect(() => {
     const requestedView = new URLSearchParams(window.location.search).get('view');
-    if (requestedView === 'scheduled') setView('scheduled');
+    if (isViewKey(requestedView)) setView(requestedView);
   }, []);
 
   useEffect(() => {
@@ -140,7 +147,7 @@ export default function Home() {
           window.location.href = '/login';
           return;
         }
-        if (view === 'scheduled') {
+        if (view === 'scheduled' || view === 'contacts') {
           if (mounted) {
             setCurrentUserEmail(email);
             setMessages([]);
@@ -216,6 +223,10 @@ export default function Home() {
     setSelected(null);
     setMobileNavOpen(false);
     setQuery('');
+    const url = new URL(window.location.href);
+    if (nextView === 'primary') url.searchParams.delete('view');
+    else url.searchParams.set('view', nextView);
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
   }
 
   function chooseMailbox(address: string) {
@@ -359,6 +370,11 @@ export default function Home() {
           <button type="button" className={`nav-item nav-subitem ${view === 'scheduled' ? 'active' : ''}`} onClick={() => chooseView('scheduled')}>
             <CalendarClock size={16} /><span>Scheduled</span>
           </button>
+
+          <div className="nav-section-label">Business</div>
+          <button type="button" className={`nav-item nav-subitem ${view === 'contacts' ? 'active' : ''}`} onClick={() => chooseView('contacts')}>
+            <BookUser size={16} /><span>Contacts</span>
+          </button>
         </nav>
 
         <div className="sidebar-bottom">
@@ -377,10 +393,12 @@ export default function Home() {
             <button className="icon-button mobile-menu" type="button" onClick={() => setMobileNavOpen(true)} aria-label="Open navigation"><Menu size={20} /></button>
             <div><p className="eyebrow">{meta.eyebrow}</p><h1>{meta.title}</h1><span className="view-description">{meta.description}</span></div>
           </div>
-          <label className="search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search mail" aria-label="Search mail" /><span className="search-shortcut">⌘ K</span></label>
+          {view !== 'contacts' && <label className="search"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search mail" aria-label="Search mail" /><span className="search-shortcut">⌘ K</span></label>}
         </header>
 
-        {view === 'scheduled' ? (
+        {view === 'contacts' ? (
+          <ContactsView onCompose={(email) => openCompose({ to: email })} />
+        ) : view === 'scheduled' ? (
           <ScheduledPanel />
         ) : (
           <div className="mail-content">
