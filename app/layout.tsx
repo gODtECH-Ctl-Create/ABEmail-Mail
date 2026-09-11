@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import './responsive-fix.css';
 import './mail-view.css';
+import './contacts-view.css';
 import '../reply-forward.css';
 import NotificationWatcher from '@/components/notification-watcher';
 import ReplyForwardController from '@/components/reply-forward-controller';

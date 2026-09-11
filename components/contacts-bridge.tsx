@@ -5,15 +5,7 @@ import { useEffect } from 'react';
 type Contact = { id: string; name: string; email: string; company?: string | null };
 
 const CONTACTS_LIST_ID = 'abemail-contact-autocomplete';
-const CONTACTS_NAV_ATTR = 'data-contacts-nav';
 const COMPOSE_HANDOFF_KEY = 'abemail-compose-handoff';
-
-function makeContactsIcon() {
-  const wrapper = document.createElement('span');
-  wrapper.setAttribute('aria-hidden', 'true');
-  wrapper.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><circle cx="9" cy="10" r="2"></circle><path d="M6.5 16c.8-1.7 2.3-2.5 4.5-2.5s3.7.8 4.5 2.5M15 9h3M15 12h3"></path></svg>';
-  return wrapper;
-}
 
 export default function ContactsBridge() {
   useEffect(() => {
@@ -35,21 +27,6 @@ export default function ContactsBridge() {
       } catch {
         return [];
       }
-    }
-
-    function installContactsNav() {
-      const nav = document.querySelector<HTMLElement>('.folder-nav');
-      if (!nav || nav.querySelector(`[${CONTACTS_NAV_ATTR}]`)) return;
-      const link = document.createElement('a');
-      link.href = '/contacts';
-      link.className = 'nav-item nav-subitem';
-      link.setAttribute(CONTACTS_NAV_ATTR, 'true');
-      link.setAttribute('aria-label', 'Contacts');
-      link.appendChild(makeContactsIcon());
-      const label = document.createElement('span');
-      label.textContent = 'Contacts';
-      link.appendChild(label);
-      nav.appendChild(link);
     }
 
     async function installAutocomplete(input: HTMLInputElement) {
@@ -95,7 +72,6 @@ export default function ContactsBridge() {
     }
 
     function scan() {
-      installContactsNav();
       installComposeHandoff();
       document.querySelectorAll<HTMLInputElement>('input[name="to"]').forEach((input) => {
         void installAutocomplete(input);
