@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useCallback, useEffect, useState } from 'react';
 import { BookUser, PenLine, Plus, Search, Trash2, X } from 'lucide-react';
 
 type Contact = {
@@ -53,7 +53,7 @@ export default function ContactsView({ onCompose }: { onCompose: (email: string)
   const [error, setError] = useState('');
   const [status, setStatus] = useState('');
 
-  async function loadContacts(search = '') {
+  const loadContacts = useCallback(async (search = '') => {
     setLoading(true);
     setError('');
     try {
@@ -71,18 +71,14 @@ export default function ContactsView({ onCompose }: { onCompose: (email: string)
     } finally {
       setLoading(false);
     }
-  }
-
-  useEffect(() => {
-    void loadContacts();
   }, []);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
       void loadContacts(query.trim());
-    }, 250);
+    }, query.trim() ? 250 : 0);
     return () => window.clearTimeout(timer);
-  }, [query]);
+  }, [query, loadContacts]);
 
   function openAddContact() {
     setForm(emptyForm);
