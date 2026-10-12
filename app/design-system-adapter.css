@@ -1,0 +1,154 @@
+/* ABEmail pilot adapter: preserve existing layout and behavior while using shared tokens. */
+html[data-theme='light-green'] {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html[data-theme='light-green'] body,
+html[data-theme='light-green'] .app-shell,
+html[data-theme='light-green'] .login-shell {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html[data-theme='light-green'] .sidebar,
+html[data-theme='light-green'] .topbar,
+html[data-theme='light-green'] .message-list,
+html[data-theme='light-green'] .message-detail,
+html[data-theme='light-green'] .composer-window,
+html[data-theme='light-green'] .login-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
+
+html[data-theme='light-green'] .sidebar,
+html[data-theme='light-green'] .topbar,
+html[data-theme='light-green'] .message-list,
+html[data-theme='light-green'] .message-detail,
+html[data-theme='light-green'] .detail-toolbar,
+html[data-theme='light-green'] .list-toolbar,
+html[data-theme='light-green'] .message-row,
+html[data-theme='light-green'] .account-card,
+html[data-theme='light-green'] .detail-meta-row,
+html[data-theme='light-green'] .composer-foot {
+  border-color: var(--border);
+}
+
+html[data-theme='light-green'] .compose,
+html[data-theme='light-green'] .send-button,
+html[data-theme='light-green'] .reply-button:not(.secondary),
+html[data-theme='light-green'] .login-card .compose {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}
+
+html[data-theme='light-green'] .compose:hover,
+html[data-theme='light-green'] .send-button:hover,
+html[data-theme='light-green'] .reply-button:not(.secondary):hover {
+  filter: brightness(0.97);
+}
+
+html[data-theme='light-green'] .nav-item {
+  color: var(--muted-foreground);
+}
+
+html[data-theme='light-green'] .nav-item:hover,
+html[data-theme='light-green'] .nav-item.active,
+html[data-theme='light-green'] .message-row:hover,
+html[data-theme='light-green'] .message-row.selected,
+html[data-theme='light-green'] .icon-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme='light-green'] .message-row:focus-visible {
+  box-shadow: inset 3px 0 0 var(--ring);
+}
+
+html[data-theme='light-green'] .search,
+html[data-theme='light-green'] .composer-window input,
+html[data-theme='light-green'] .composer-window textarea,
+html[data-theme='light-green'] .login-card input {
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--input);
+}
+
+html[data-theme='light-green'] .search:focus-within,
+html[data-theme='light-green'] .login-card input:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 23%, transparent);
+}
+
+html[data-theme='light-green'] .search input,
+html[data-theme='light-green'] .composer-window input,
+html[data-theme='light-green'] .composer-window textarea {
+  color: var(--foreground);
+}
+
+html[data-theme='light-green'] .search input::placeholder,
+html[data-theme='light-green'] .composer-window input::placeholder,
+html[data-theme='light-green'] .composer-window textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+html[data-theme='light-green'] .search-shortcut,
+html[data-theme='light-green'] .ghost-action,
+html[data-theme='light-green'] .reply-button.secondary,
+html[data-theme='light-green'] .icon-button {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+html[data-theme='light-green'] .icon-button:hover {
+  border-color: transparent;
+}
+
+html[data-theme='light-green'] .empty-icon {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+html[data-theme='light-green'] .empty-state,
+html[data-theme='light-green'] .detail-placeholder,
+html[data-theme='light-green'] .message-main p,
+html[data-theme='light-green'] .message-head span,
+html[data-theme='light-green'] .account-copy span,
+html[data-theme='light-green'] .detail-meta span,
+html[data-theme='light-green'] .detail-meta-row time,
+html[data-theme='light-green'] .status-text {
+  color: var(--muted-foreground);
+}
+
+html[data-theme='light-green'] .empty-state strong,
+html[data-theme='light-green'] .detail-placeholder strong,
+html[data-theme='light-green'] .detail-heading h2,
+html[data-theme='light-green'] .message-content {
+  color: var(--foreground);
+}
+
+html[data-theme='light-green'] .loading-line {
+  background: linear-gradient(90deg, var(--muted), var(--card), var(--muted));
+  background-size: 200% 100%;
+}
+
+html[data-theme='light-green'] .login-visual {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+html[data-theme='light-green'] .login-visual-copy p {
+  color: color-mix(in srgb, var(--secondary-foreground) 72%, transparent);
+}
+
+html[data-theme='light-green'] .login-card {
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+html[data-theme='light-green'] .primary-action {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 22%, transparent);
+}
