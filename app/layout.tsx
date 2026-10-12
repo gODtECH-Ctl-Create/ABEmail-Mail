@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import '@abe-techlab/abe-techlab-design-system/styles/themes/light-green.css';
 import './responsive-fix.css';
 import './mail-view.css';
 import './contacts-view.css';
 import '../reply-forward.css';
+import './design-system-adapter.css';
 import NotificationWatcher from '@/components/notification-watcher';
 import ReplyForwardController from '@/components/reply-forward-controller';
 import AttachmentsController from '@/components/attachments-controller';
@@ -19,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="light-green">
       <body>
         {children}
         <NotificationWatcher />
