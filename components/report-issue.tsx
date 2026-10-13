@@ -158,38 +158,58 @@ export default function ReportIssue() {
         onClick={() => { setContext({}); setResult(null); setDescription(''); setOpen(true); }}
         aria-label="Report a problem"
         title="Report a problem"
-        style={{ position: 'fixed', right: 16, bottom: 16, zIndex: 45, width: 42, height: 42, borderRadius: 999, border: '1px solid #dfe2e6', background: '#fff', display: 'grid', placeItems: 'center', color: '#4e545c', boxShadow: '0 8px 25px rgba(0,0,0,.1)', cursor: 'pointer' }}
+        className="report-issue-fab"
       >
         <Bug size={17} />
       </button>
 
       {open ? (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 95, background: 'rgba(15,18,22,.35)', display: 'grid', placeItems: 'center', padding: 16 }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="report-issue-title" style={{ width: 'min(520px,100%)', background: '#fff', border: '1px solid #e2e5e9', borderRadius: 16, padding: 20, boxShadow: '0 24px 80px rgba(0,0,0,.18)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+        <div className="report-issue-backdrop">
+          <section className="report-issue-dialog" role="dialog" aria-modal="true" aria-labelledby="report-issue-title">
+            <div className="report-issue-header">
               <div>
-                <p style={{ margin: 0, fontSize: 10, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 800, color: '#8a9098' }}>ABEmail Support</p>
-                <h2 id="report-issue-title" style={{ margin: '5px 0 0', fontSize: 18 }}>Report a problem</h2>
+                <p className="report-issue-kicker">ABEmail Support</p>
+                <h2 id="report-issue-title">Report a problem</h2>
               </div>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close" style={{ width: 34, height: 34, border: 0, background: 'transparent', display: 'grid', placeItems: 'center', cursor: 'pointer', color: '#777d85' }}><X size={18} /></button>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="report-issue-close">
+                <X size={18} />
+              </button>
             </div>
 
             {context.action || context.errorMessage ? (
-              <div style={{ marginTop: 14, padding: 11, borderRadius: 10, background: '#f7f8fa', fontSize: 12, color: '#5f656d' }}>
+              <div className="report-issue-context">
                 <strong>{context.action ? `Action: ${context.action}` : 'Issue detected'}</strong>
-                {context.errorMessage ? <div style={{ marginTop: 4 }}>{context.errorMessage}</div> : null}
+                {context.errorMessage ? <div className="report-issue-context-detail">{context.errorMessage}</div> : null}
               </div>
             ) : null}
 
-            <textarea value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Tell us what happened..." rows={5} style={{ width: '100%', marginTop: 14, border: '1px solid #dfe2e6', borderRadius: 10, padding: 11, resize: 'vertical', outline: 0, font: 'inherit', boxSizing: 'border-box' }} />
+            <textarea
+              className="report-issue-textarea"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Tell us what happened..."
+              rows={5}
+            />
 
-            <p style={{ fontSize: 11, lineHeight: 1.5, color: '#8b9098', margin: '10px 0 0' }}>ABEmail attaches safe diagnostics such as the time, page, action and request context. It does not include passwords, access tokens or message bodies.</p>
+            <p className="report-issue-help">ABEmail attaches safe diagnostics such as the time, page, action and request context. It does not include passwords, access tokens or message bodies.</p>
 
-            {result ? <div style={{ marginTop: 12, padding: 10, borderRadius: 9, background: result.startsWith('Report ') ? '#eef8f2' : '#fff1f1', color: result.startsWith('Report ') ? '#28714b' : '#a13b34', fontSize: 12, display: 'flex', alignItems: 'center', gap: 7 }}><CheckCircle2 size={14} />{result}</div> : null}
+            {result ? (
+              <div className={`report-issue-result ${result.startsWith('Report ') ? 'is-success' : 'is-error'}`} role="status">
+                <CheckCircle2 size={14} />
+                <span>{result}</span>
+              </div>
+            ) : null}
 
-            <div style={{ marginTop: 14, display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-              <button type="button" onClick={() => setOpen(false)} style={{ border: '1px solid #dfe2e6', background: '#fff', borderRadius: 9, padding: '9px 12px', cursor: 'pointer' }}>Cancel</button>
-              <button type="button" onClick={submit} disabled={submitting || (!description.trim() && !context.errorMessage && !context.action)} style={{ border: 0, background: '#15171a', color: '#fff', borderRadius: 9, padding: '9px 13px', cursor: 'pointer', opacity: submitting ? .6 : 1 }}>{submitting ? 'Sending…' : 'Submit report'}</button>
+            <div className="report-issue-actions">
+              <button type="button" onClick={() => setOpen(false)} className="report-issue-cancel">Cancel</button>
+              <button
+                type="button"
+                onClick={submit}
+                disabled={submitting || (!description.trim() && !context.errorMessage && !context.action)}
+                className="report-issue-submit"
+              >
+                {submitting ? 'Sending…' : 'Submit report'}
+              </button>
             </div>
           </section>
         </div>
