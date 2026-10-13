@@ -370,3 +370,49 @@ html[data-theme] .report-issue-submit:disabled {
     border-top: 1px solid var(--border);
   }
 }
+
+
+/* Inbox message-count toolbar and mailbox/user filters follow every active palette. */
+html[data-theme] .list-toolbar {
+  background: var(--card);
+  color: var(--muted-foreground);
+  border-bottom-color: var(--border);
+}
+
+html[data-theme] .mailbox-filter-bar {
+  background: var(--card);
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+html[data-theme] .mailbox-filter-label {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .mailbox-filter-scroll {
+  scrollbar-color: var(--border) transparent;
+}
+
+html[data-theme] .mailbox-chip {
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--muted-foreground);
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+html[data-theme] .mailbox-chip:hover {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .mailbox-chip.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+html[data-theme] .mailbox-chip:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
