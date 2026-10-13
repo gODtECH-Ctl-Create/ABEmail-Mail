@@ -152,3 +152,221 @@ html[data-theme] .login-card {
 html[data-theme] .primary-action {
   box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 22%, transparent);
 }
+
+
+/* Report/feedback floating control and dialog follow the active palette in light and dark mode. */
+html[data-theme] .report-issue-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 45;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 25px color-mix(in srgb, var(--foreground) 14%, transparent);
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+html[data-theme] .report-issue-fab:hover {
+  transform: translateY(-2px);
+  filter: brightness(.97);
+}
+
+html[data-theme] .report-issue-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: color-mix(in srgb, var(--foreground) 38%, transparent);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+html[data-theme] .report-issue-dialog {
+  width: min(520px, 100%);
+  max-height: min(90dvh, 760px);
+  overflow: auto;
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+
+html[data-theme] .report-issue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+html[data-theme] .report-issue-kicker {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+html[data-theme] .report-issue-dialog h2 {
+  margin: 5px 0 0;
+  color: var(--foreground);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+html[data-theme] .report-issue-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+html[data-theme] .report-issue-close:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .report-issue-context {
+  margin-top: 14px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+html[data-theme] .report-issue-context strong {
+  color: var(--foreground);
+}
+
+html[data-theme] .report-issue-context-detail {
+  margin-top: 4px;
+}
+
+html[data-theme] .report-issue-textarea {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  border: 1px solid var(--input);
+  border-radius: 10px;
+  padding: 11px;
+  resize: vertical;
+  outline: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+html[data-theme] .report-issue-textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .report-issue-textarea:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 23%, transparent);
+}
+
+html[data-theme] .report-issue-help {
+  margin: 10px 0 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+html[data-theme] .report-issue-result {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary) 9%, var(--card));
+  color: var(--primary);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-wrap: anywhere;
+}
+
+html[data-theme] .report-issue-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+html[data-theme] .report-issue-cancel,
+html[data-theme] .report-issue-submit {
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+html[data-theme] .report-issue-cancel {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+html[data-theme] .report-issue-cancel:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .report-issue-submit {
+  border: 1px solid transparent;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding-inline: 13px;
+}
+
+html[data-theme] .report-issue-submit:hover:not(:disabled) {
+  filter: brightness(.97);
+}
+
+html[data-theme] .report-issue-submit:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 540px) {
+  html[data-theme] .report-issue-backdrop {
+    padding: 10px;
+    align-items: end;
+  }
+
+  html[data-theme] .report-issue-dialog {
+    max-height: 92dvh;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  html[data-theme] .report-issue-actions {
+    position: sticky;
+    bottom: -16px;
+    margin-inline: -16px;
+    margin-bottom: -16px;
+    padding: 12px 16px 16px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+  }
+}
