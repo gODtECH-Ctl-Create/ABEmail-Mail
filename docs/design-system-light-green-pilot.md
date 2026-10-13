@@ -10,6 +10,10 @@ This branch pilots `@abe-techlab/abe-techlab-design-system@0.1.0` in the existin
 - Preserve the existing application layout, routes, authentication, database behavior, and email interactions.
 - Defer other palettes, the user-facing theme selector, and the separate Admin/Settings visual pass until the first preview has been reviewed.
 
+## Visual-only preview route
+
+Open `/design-preview` on a Vercel Preview deployment to review the Light Green inbox, message list, reading pane, and action styling with fictional sample messages. This route is disabled on Production and does not call Supabase or Resend. Interactive mail actions are intentionally disabled.
+
 ## GitHub Packages access
 
 The root `.npmrc` points the `@abe-techlab` scope at GitHub Packages and reads its credential from the environment variable `GITHUB_PACKAGES_TOKEN`. No credential is stored in source control.
