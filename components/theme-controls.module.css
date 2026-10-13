@@ -1,0 +1,103 @@
+.controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-width: 0;
+}
+
+.preview {
+  padding: 12px 18px;
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+}
+
+.settings {
+  width: 100%;
+}
+
+.themeLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 160px;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.themeSelect {
+  width: 100%;
+  min-height: 38px;
+  padding: 0 32px 0 11px;
+  appearance: auto;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.themeSelect:focus-visible,
+.modeButton:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.modeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+  transition: border-color .15s ease, background .15s ease;
+}
+
+.modeButton:hover:not(:disabled) {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.modeButton:disabled {
+  opacity: .7;
+  cursor: wait;
+}
+
+.modeHint {
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 550;
+}
+
+@media (max-width: 520px) {
+  .preview {
+    padding: 10px 12px;
+  }
+
+  .themeLabel {
+    flex: 1 1 155px;
+  }
+
+  .modeButton {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .modeHint {
+    margin-left: auto;
+  }
+}
