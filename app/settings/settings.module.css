@@ -1,7 +1,7 @@
 .page {
   min-height: 100vh;
-  background: #f4f5f7;
-  color: #16181d;
+  background: var(--background);
+  color: var(--foreground);
 }
 
 .shell {
@@ -20,20 +20,20 @@
 .backButton {
   width: 40px;
   height: 40px;
-  border: 1px solid #dfe2e6;
-  background: #fff;
-  color: #51565e;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-foreground);
   border-radius: 10px;
   display: grid;
   place-items: center;
   cursor: pointer;
 }
 
-.backButton:hover { background: #f9fafb; color: #16181d; }
+.backButton:hover { background: var(--accent); color: var(--accent-foreground); }
 
 .eyebrow {
   margin: 0;
-  color: #8b9098;
+  color: var(--muted-foreground);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .12em;
@@ -49,7 +49,7 @@
 .subtitle,
 .sectionHeader p {
   margin: 0;
-  color: #737983;
+  color: var(--muted-foreground);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -66,25 +66,26 @@
 }
 
 .notice {
-  background: #fff;
-  border: 1px solid #dfe2e6;
-  color: #267447;
-  box-shadow: 0 8px 30px rgba(0,0,0,.04);
+  background: var(--card);
+  border: 1px solid var(--border);
+  color: var(--accent-foreground);
+  box-shadow: 0 8px 30px color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
 .errorNotice {
-  background: #fff4f4;
-  border: 1px solid #f0d0d0;
-  color: #a12d2d;
+  background: color-mix(in srgb, var(--destructive) 10%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--destructive) 35%, var(--border));
+  color: var(--destructive);
 }
 
 .card {
-  background: #fff;
-  border: 1px solid #e4e6ea;
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
   border-radius: 16px;
   padding: 22px;
   margin-top: 14px;
-  box-shadow: 0 12px 40px rgba(0,0,0,.035);
+  box-shadow: 0 12px 40px color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
 .sectionHeader {
@@ -99,8 +100,8 @@
   height: 36px;
   flex: 0 0 36px;
   border-radius: 10px;
-  background: #f1f2f4;
-  color: #4d535b;
+  background: var(--muted);
+  color: var(--muted-foreground);
   display: grid;
   place-items: center;
 }
@@ -121,16 +122,17 @@
 .accountRow {
   gap: 12px;
   padding: 14px;
-  border: 1px solid #eceef1;
+  border: 1px solid var(--border);
   border-radius: 12px;
-  background: #fafbfc;
+  background: var(--muted);
 }
 
 .avatar {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #eceff2;
+  background: var(--accent);
+  color: var(--accent-foreground);
   display: grid;
   place-items: center;
   font-size: 12px;
@@ -157,7 +159,7 @@
 .billingSummary span,
 .mailboxItem small {
   margin-top: 3px;
-  color: #858a92;
+  color: var(--muted-foreground);
   font-size: 11px;
 }
 
@@ -172,20 +174,20 @@
 }
 
 .statusPill {
-  background: #edf8f1;
-  color: #267447;
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .setupPill {
-  background: #f2f3f5;
-  color: #636872;
+  background: var(--secondary);
+  color: var(--secondary-foreground);
 }
 
 .toggleRow {
   justify-content: space-between;
   gap: 16px;
   padding: 14px 0;
-  border-top: 1px solid #eceef1;
+  border-top: 1px solid var(--border);
 }
 
 .toggleRow > div {
@@ -209,7 +211,7 @@
   border: 0;
   padding: 3px;
   border-radius: 999px;
-  background: #dcdfe4;
+  background: var(--input);
   cursor: pointer;
   display: flex;
   justify-content: flex-start;
@@ -227,7 +229,7 @@
 }
 
 .toggleOn {
-  background: #15171a;
+  background: var(--primary);
   justify-content: flex-end;
 }
 
@@ -240,8 +242,8 @@
   margin-top: 14px;
   padding: 12px 13px;
   border-radius: 11px;
-  background: #f7f8f9;
-  border: 1px solid #eceef1;
+  background: var(--muted);
+  border: 1px solid var(--border);
 }
 
 .infoBox span {
@@ -250,12 +252,12 @@
   gap: 6px;
   font-size: 11px;
   font-weight: 800;
-  color: #51565e;
+  color: var(--foreground);
 }
 
 .infoBox p {
   margin: 5px 0 0;
-  color: #747a83;
+  color: var(--muted-foreground);
   font-size: 11px;
   line-height: 1.55;
 }
@@ -270,9 +272,10 @@
   display: flex;
   flex-direction: column;
   padding: 13px;
-  border: 1px solid #eceef1;
+  border: 1px solid var(--border);
   border-radius: 11px;
   min-width: 0;
+  background: var(--card);
 }
 
 .mailboxItem span {
@@ -295,7 +298,7 @@
 
 .label {
   display: block;
-  color: #8b9098;
+  color: var(--muted-foreground);
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -314,8 +317,9 @@
 }
 
 .cycleCard {
-  border: 1px solid #e2e4e8;
-  background: #fff;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
   border-radius: 12px;
   padding: 15px;
   text-align: left;
@@ -329,8 +333,9 @@
 
 .cycleCard:hover:not(:disabled),
 .selected {
-  border-color: #bfc4cb;
-  background: #fafbfc;
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
 .cycleCard:disabled {
@@ -353,7 +358,7 @@
   text-align: right;
   font-size: 12px;
   font-weight: 800;
-  color: #262a30;
+  color: var(--foreground);
 }
 
 .price small {
@@ -361,7 +366,7 @@
   margin-top: 2px;
   font-size: 10px;
   font-weight: 600;
-  color: #8b9098;
+  color: var(--muted-foreground);
 }
 
 .billingSummary {
@@ -373,8 +378,10 @@
 
 .billingSummary > div {
   padding: 12px;
-  border: 1px solid #eceef1;
+  border: 1px solid var(--border);
   border-radius: 11px;
+  background: var(--card);
+  color: var(--foreground);
   display: flex;
   flex-direction: column;
 }
@@ -387,7 +394,7 @@
 .footer {
   padding-top: 22px;
   text-align: center;
-  color: #92979f;
+  color: var(--muted-foreground);
   font-size: 10px;
 }
 
