@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import ThemeControls from '@/components/theme-controls';
 import {
   Archive,
   Bell,
@@ -108,7 +109,7 @@ export default function DesignPreviewPage() {
         <header className="topbar">
           <div className="topbar-left">
             <div>
-              <p className="eyebrow">Light Green · Design preview</p>
+              <p className="eyebrow">Design system · Preview lab</p>
               <h1>Primary</h1>
               <span className="view-description">Sample messages only. No live mail or account changes.</span>
             </div>
@@ -119,6 +120,8 @@ export default function DesignPreviewPage() {
             <span className="search-shortcut">Ctrl K</span>
           </label>
         </header>
+
+        <ThemeControls variant="preview" />
 
         <div className="mail-content">
           <section className="message-list" aria-label="Sample message list">
@@ -172,7 +175,7 @@ export default function DesignPreviewPage() {
               <div className="message-content">
                 <p>Hi there,</p>
                 <p>This is a sample reading pane for the ABE TechLab Design System pilot.</p>
-                <p>The Light Green palette now supplies shared background, surface, border, muted text, focus, and action colors while the existing mail layout stays in place.</p>
+                <p>The selected palette supplies shared background, surface, border, muted text, focus, and action colors while the existing mail layout stays in place.</p>
                 <p>This preview uses fictional content only. Sending, replying, attachments, search, and mailbox changes are intentionally disabled here.</p>
                 <p>Thanks,<br />Morgan</p>
               </div>
