@@ -1,0 +1,252 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: color-mix(in srgb, var(--foreground, #16181d) 46%, transparent);
+  backdrop-filter: blur(5px);
+  animation: announcementFadeIn 160ms ease-out both;
+}
+
+.dialog {
+  position: relative;
+  width: min(480px, 100%);
+  max-height: min(90dvh, 760px);
+  overflow: auto;
+  padding: 28px;
+  border: 1px solid var(--border, #e4e6ea);
+  border-radius: 22px;
+  background: var(--card, #fff);
+  color: var(--card-foreground, var(--foreground, #16181d));
+  box-shadow: 0 28px 90px color-mix(in srgb, var(--foreground, #16181d) 24%, transparent);
+  animation: announcementRiseIn 200ms ease-out both;
+}
+
+.closeButton {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border: 1px solid var(--border, #e4e6ea);
+  border-radius: 10px;
+  background: var(--background, #f7f8f9);
+  color: var(--foreground, #16181d);
+  cursor: pointer;
+}
+
+.closeButton:hover {
+  background: var(--accent, #eff1f3);
+  color: var(--accent-foreground, var(--foreground, #16181d));
+}
+
+.artwork {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 126px;
+  margin: 0 0 24px;
+  padding: 18px;
+  border: 1px solid var(--border, #e4e6ea);
+  border-radius: 16px;
+  background: var(--background, #f7f8f9);
+}
+
+.themeTile,
+.themeTileDark {
+  display: grid;
+  min-width: 102px;
+  justify-items: center;
+  gap: 8px;
+  padding: 13px 18px;
+  border: 1px solid var(--border, #e4e6ea);
+  border-radius: 12px;
+  background: #fff;
+  color: #20242a;
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.themeTileDark {
+  border-color: #3d424b;
+  background: #1d2026;
+  color: #f5f6f7;
+}
+
+.themeDivider {
+  width: 1px;
+  height: 56px;
+  background: var(--border, #e4e6ea);
+}
+
+.paletteArtwork {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  color: var(--foreground, #16181d);
+}
+
+.paletteArtwork svg {
+  margin-left: 6px;
+}
+
+.paletteDotOne,
+.paletteDotTwo,
+.paletteDotThree,
+.paletteDotFour {
+  width: 34px;
+  height: 68px;
+  border: 1px solid color-mix(in srgb, var(--foreground, #16181d) 12%, transparent);
+  border-radius: 12px;
+}
+
+.paletteDotOne { background: #b7ff3c; }
+.paletteDotTwo { background: #15171a; }
+.paletteDotThree { background: #e7e9ec; }
+.paletteDotFour { background: #7582e8; }
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--muted-foreground, #737983);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: .14em;
+}
+
+.dialog h2 {
+  margin: 0;
+  max-width: 360px;
+  color: var(--foreground, #16181d);
+  font-size: clamp(23px, 4vw, 30px);
+  line-height: 1.12;
+  letter-spacing: -.035em;
+}
+
+.description {
+  margin: 13px 0 0;
+  color: var(--muted-foreground, #636872);
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.hint {
+  margin: 16px 0 20px;
+  padding: 11px 12px;
+  border: 1px solid var(--border, #e4e6ea);
+  border-radius: 10px;
+  background: var(--background, #f7f8f9);
+  color: var(--muted-foreground, #636872);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.hint strong {
+  color: var(--foreground, #16181d);
+}
+
+.primaryButton,
+.secondaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  border-radius: 11px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.primaryButton {
+  border: 1px solid var(--primary, #15171a);
+  background: var(--primary, #15171a);
+  color: var(--primary-foreground, #fff);
+}
+
+.primaryButton:hover {
+  transform: translateY(-1px);
+  filter: brightness(.96);
+}
+
+.secondaryButton {
+  margin-top: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground, #737983);
+}
+
+.secondaryButton:hover {
+  border-color: var(--border, #e4e6ea);
+  background: var(--background, #f7f8f9);
+  color: var(--foreground, #16181d);
+}
+
+.closeButton:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+  outline: 3px solid var(--ring, #7582e8);
+  outline-offset: 3px;
+}
+
+.footnote {
+  margin: 16px 0 0;
+  color: var(--muted-foreground, #858a92);
+  font-size: 10px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+@keyframes announcementFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes announcementRiseIn {
+  from { opacity: 0; transform: translateY(8px) scale(.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+  .dialog {
+    padding: 24px 20px 20px;
+    border-radius: 18px;
+  }
+
+  .artwork {
+    min-height: 110px;
+    margin-bottom: 20px;
+  }
+
+  .themeTile,
+  .themeTileDark {
+    min-width: 88px;
+    padding: 12px;
+  }
+
+  .paletteArtwork { gap: 8px; }
+  .paletteDotOne,
+  .paletteDotTwo,
+  .paletteDotThree,
+  .paletteDotFour {
+    width: 28px;
+    height: 54px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backdrop,
+  .dialog { animation: none; }
+  .primaryButton,
+  .secondaryButton { transition: none; }
+}
