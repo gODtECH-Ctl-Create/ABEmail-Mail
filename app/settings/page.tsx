@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, Bell, Check, CircleUserRound, CreditCard, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Bell, Check, CircleUserRound, CreditCard, Mail, Palette, ShieldCheck } from 'lucide-react';
+import ThemeControls from '@/components/theme-controls';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
 import styles from './settings.module.css';
 
@@ -234,6 +235,21 @@ export default function SettingsPage() {
             {error}
           </div>
         )}
+
+        <section className={styles.card}>
+          <div className={styles.sectionHeader}>
+            <div className={styles.sectionIcon}><Palette size={18} /></div>
+            <div>
+              <h2>Appearance</h2>
+              <p>Choose the visual theme used across ABEmail.</p>
+            </div>
+          </div>
+          <ThemeControls variant="settings" />
+          <div className={styles.infoBox}>
+            <span>Theme preferences</span>
+            <p>Your selected palette and light/dark mode are saved in this browser and applied across the mailbox.</p>
+          </div>
+        </section>
 
         <section className={styles.card}>
           <div className={styles.sectionHeader}>

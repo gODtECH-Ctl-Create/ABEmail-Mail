@@ -21,13 +21,72 @@ export default function LoginPage() {
     setBusy(true);
     setError('');
 
-    const { error: authError } = await getSupabaseBrowser().auth.signInWithPassword({ email, password });
-    setBusy(false);
+    const supabase = getSupabaseBrowser();
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
     if (authError) {
+      setBusy(false);
       setError(authError.message);
       return;
     }
 
+    // Count successful sign-ins only. The Supabase user metadata keeps this introduction
+    // consistent across devices; browser storage is a best-effort fallback.
+    const user = authData.user;
+    if (user) {
+      const countKey = 'abemail_theme_discovery_login_count_v1:' + user.id;
+      const pendingKey = 'abemail_theme_discovery_pending_v1:' + user.id;
+      let localCount = 0;
+
+      try {
+        const storedCount = Number(window.localStorage.getItem(countKey) ?? '0');
+        if (Number.isFinite(storedCount) && storedCount >= 0) localCount = Math.floor(storedCount);
+      } catch {
+        // Continue with the authenticated user's metadata.
+      }
+
+      const metadataCount = Number(user.user_metadata?.abemail_theme_discovery_login_count_v1 ?? 0);
+      const currentCount = Number.isFinite(metadataCount) && metadataCount >= 0
+        ? Math.max(Math.floor(metadataCount), localCount)
+        : localCount;
+      const nextCount = currentCount + 1;
+      const pendingStep = nextCount <= 2 ? nextCount : null;
+      let metadataSaved = false;
+
+      try {
+        const { error: trackingError } = await supabase.auth.updateUser({
+          data: {
+            abemail_theme_discovery_login_count_v1: nextCount,
+            abemail_theme_discovery_pending_v1: pendingStep,
+          },
+        });
+        if (trackingError) throw trackingError;
+        metadataSaved = true;
+      } catch (trackingError) {
+        console.warn('Theme announcement tracking is using browser storage for this sign-in.', trackingError);
+      }
+
+      try {
+        window.localStorage.setItem(countKey, String(nextCount));
+        if (pendingStep === null) {
+          window.localStorage.removeItem(pendingKey);
+        } else {
+          window.localStorage.setItem(pendingKey, String(pendingStep));
+        }
+      } catch {
+        // The login must remain usable even if browser storage is unavailable.
+      }
+
+      // Keep sign-in functional if neither tracking mechanism is available.
+      if (!metadataSaved && pendingStep !== null) {
+        try {
+          window.localStorage.setItem(pendingKey, String(pendingStep));
+        } catch {
+          // Announcement tracking is non-critical to authentication.
+        }
+      }
+    }
+
+    setBusy(false);
     window.location.href = getSafeRedirect();
   }
 

@@ -588,7 +588,7 @@ function ScheduledPanel() {
   return (
     <div style={{ padding: 24, minWidth: 0, overflowY: 'auto' }}>
       <div style={{ maxWidth: 1080, margin: '0 auto', display: 'grid', gap: 16 }}>
-        <section style={{ background: '#fff', border: '1px solid #e4e6ea', borderRadius: 16, padding: 20 }}>
+        <section style={{ background: 'var(--card)', color: 'var(--card-foreground)', border: '1px solid var(--border)', borderRadius: 16, padding: 20 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
             <div><p className="eyebrow">{editingId ? 'Edit schedule' : 'New schedule'}</p><h2 style={{ margin: '4px 0 0', fontSize: 20 }}>{editingId ? 'Update scheduled email' : 'Schedule an email'}</h2></div>
             {editingId && <button type="button" onClick={resetForm} className="ghost-action">Cancel edit</button>}
@@ -599,7 +599,7 @@ function ScheduledPanel() {
             <label style={scheduledLabel}>Message<textarea required value={form.body} onChange={(event) => setForm((current) => ({ ...current, body: event.target.value }))} placeholder="Write your message…" style={{ ...scheduledInput, minHeight: 150, resize: 'vertical', lineHeight: 1.6 }} /></label>
             <label style={scheduledLabel}>Send at<input required type="datetime-local" value={form.scheduledAt} min={localInputValue(new Date())} onChange={(event) => setForm((current) => ({ ...current, scheduledAt: event.target.value }))} style={scheduledInput} /></label>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', paddingTop: 4 }}>
-              <span style={{ fontSize: 11, color: status.includes('Unable') || status.includes('Invalid') ? '#a12d2d' : '#6f757e' }}>{status}</span>
+              <span style={{ fontSize: 11, color: status.includes('Unable') || status.includes('Invalid') ? 'var(--primary)' : 'var(--muted-foreground)' }}>{status}</span>
               <button type="submit" disabled={busy} className="send-button">{busy ? 'Saving…' : editingId ? 'Update schedule' : 'Schedule send'} <CalendarClock size={15} /></button>
             </div>
           </form>
@@ -618,9 +618,9 @@ function ScheduledPanel() {
             <article key={message.id} style={scheduledCard}>
               <div style={{ minWidth: 0 }}>
                 <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}><strong style={{ fontSize: 14 }}>{message.subject || '(no subject)'}</strong><span style={statusPill(message.status)}>{message.status}</span></div>
-                <div style={{ marginTop: 6, fontSize: 11, color: '#737983', overflowWrap: 'anywhere' }}>{message.to_addresses.join(', ')}</div>
-                <div style={{ marginTop: 8, fontSize: 12, color: '#4e545d' }}><CalendarClock size={13} style={{ verticalAlign: 'middle', marginRight: 5 }} />{displayDate(message.scheduled_at)}</div>
-                {message.last_error && <div style={{ marginTop: 7, color: '#a12d2d', fontSize: 11 }}>{message.last_error}</div>}
+                <div style={{ marginTop: 6, fontSize: 11, color: 'var(--muted-foreground)', overflowWrap: 'anywhere' }}>{message.to_addresses.join(', ')}</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: 'var(--foreground)' }}><CalendarClock size={13} style={{ verticalAlign: 'middle', marginRight: 5 }} />{displayDate(message.scheduled_at)}</div>
+                {message.last_error && <div style={{ marginTop: 7, color: 'var(--primary)', fontSize: 11 }}>{message.last_error}</div>}
               </div>
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <button type="button" onClick={() => editMessage(message)} disabled={busy || message.status === 'processing'} className="ghost-action">Edit / Reschedule</button>
@@ -630,17 +630,17 @@ function ScheduledPanel() {
             </article>
           ))}
 
-          {completed.length > 0 && <div style={{ display: 'grid', gap: 10, marginTop: 4 }}><p className="eyebrow" style={{ margin: 0 }}>History</p>{completed.map((message) => <article key={message.id} style={{ ...scheduledCard, gridTemplateColumns: '1fr auto' }}><div style={{ minWidth: 0 }}><strong style={{ display: 'block', fontSize: 12 }}>{message.subject || '(no subject)'}</strong><span style={{ display: 'block', marginTop: 4, fontSize: 10, color: '#858a92' }}>{message.status} · {message.sent_at ? displayDate(message.sent_at) : displayDate(message.updated_at)}</span></div><button type="button" onClick={() => void deleteMessage(message.id)} disabled={busy} className="ghost-action">Delete</button></article>)}</div>}
+          {completed.length > 0 && <div style={{ display: 'grid', gap: 10, marginTop: 4 }}><p className="eyebrow" style={{ margin: 0 }}>History</p>{completed.map((message) => <article key={message.id} style={{ ...scheduledCard, gridTemplateColumns: '1fr auto' }}><div style={{ minWidth: 0 }}><strong style={{ display: 'block', fontSize: 12 }}>{message.subject || '(no subject)'}</strong><span style={{ display: 'block', marginTop: 4, fontSize: 10, color: 'var(--muted-foreground)' }}>{message.status} · {message.sent_at ? displayDate(message.sent_at) : displayDate(message.updated_at)}</span></div><button type="button" onClick={() => void deleteMessage(message.id)} disabled={busy} className="ghost-action">Delete</button></article>)}</div>}
         </section>
       </div>
     </div>
   );
 }
 
-const scheduledLabel: React.CSSProperties = { display: 'grid', gap: 5, fontSize: 11, color: '#666c75', fontWeight: 700 };
-const scheduledInput: React.CSSProperties = { padding: '11px 12px', border: '1px solid #dfe2e6', borderRadius: 10, outline: 0, background: '#fff', color: '#20242a' };
-const scheduledCard: React.CSSProperties = { background: '#fff', border: '1px solid #e4e6ea', borderRadius: 16, padding: 18, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: 14, alignItems: 'center' };
-function statusPill(status: string): React.CSSProperties { return { borderRadius: 999, padding: '5px 8px', background: status === 'failed' ? '#fff0ef' : status === 'processing' ? '#eef1f6' : '#eef8f2', color: status === 'failed' ? '#aa3a32' : '#4f5966', fontSize: 10, textTransform: 'uppercase', fontWeight: 800 }; }
+const scheduledLabel: React.CSSProperties = { display: 'grid', gap: 5, fontSize: 11, color: 'var(--muted-foreground)', fontWeight: 700 };
+const scheduledInput: React.CSSProperties = { padding: '11px 12px', border: '1px solid var(--input)', borderRadius: 10, outline: 0, background: 'var(--background)', color: 'var(--foreground)' };
+const scheduledCard: React.CSSProperties = { background: 'var(--card)', color: 'var(--card-foreground)', border: '1px solid var(--border)', borderRadius: 16, padding: 18, display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: 14, alignItems: 'center' };
+function statusPill(status: string): React.CSSProperties { return { border: '1px solid var(--border)', borderRadius: 999, padding: '5px 8px', background: status === 'processing' ? 'var(--accent)' : status === 'failed' ? 'color-mix(in srgb, var(--primary) 14%, var(--card))' : 'var(--muted)', color: status === 'processing' ? 'var(--accent-foreground)' : status === 'failed' ? 'var(--primary)' : 'var(--muted-foreground)', fontSize: 10, textTransform: 'uppercase', fontWeight: 800 }; }
 
 function Compose({ seed, onClose, onDraftDeleted, onSent, onScheduled }: { seed: ComposeSeed; onClose: () => void; onDraftDeleted: () => void; onSent: () => void; onScheduled: () => void }) {
   const [to, setTo] = useState(seed.to ?? '');

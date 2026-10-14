@@ -1,0 +1,418 @@
+/* ABEmail pilot adapter: preserve existing layout and behavior while using shared tokens. */
+html[data-theme] {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html[data-theme] body,
+html[data-theme] .app-shell,
+html[data-theme] .login-shell {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+html[data-theme] .sidebar,
+html[data-theme] .topbar,
+html[data-theme] .message-list,
+html[data-theme] .message-detail,
+html[data-theme] .composer-window,
+html[data-theme] .login-card {
+  background: var(--card);
+  color: var(--card-foreground);
+  border-color: var(--border);
+}
+
+html[data-theme] .sidebar,
+html[data-theme] .topbar,
+html[data-theme] .message-list,
+html[data-theme] .message-detail,
+html[data-theme] .detail-toolbar,
+html[data-theme] .list-toolbar,
+html[data-theme] .message-row,
+html[data-theme] .account-card,
+html[data-theme] .detail-meta-row,
+html[data-theme] .composer-foot {
+  border-color: var(--border);
+}
+
+html[data-theme] .compose,
+html[data-theme] .send-button,
+html[data-theme] .reply-button:not(.secondary),
+html[data-theme] .login-card .compose {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: transparent;
+}
+
+html[data-theme] .compose:hover,
+html[data-theme] .send-button:hover,
+html[data-theme] .reply-button:not(.secondary):hover {
+  filter: brightness(0.97);
+}
+
+html[data-theme] .nav-item {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .nav-item:hover,
+html[data-theme] .nav-item.active,
+html[data-theme] .message-row:hover,
+html[data-theme] .message-row.selected,
+html[data-theme] .icon-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .message-row:focus-visible {
+  box-shadow: inset 3px 0 0 var(--ring);
+}
+
+html[data-theme] .search,
+html[data-theme] .composer-window input,
+html[data-theme] .composer-window textarea,
+html[data-theme] .login-card input {
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--input);
+}
+
+html[data-theme] .search:focus-within,
+html[data-theme] .login-card input:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 23%, transparent);
+}
+
+html[data-theme] .search input,
+html[data-theme] .composer-window input,
+html[data-theme] .composer-window textarea {
+  color: var(--foreground);
+}
+
+html[data-theme] .search input::placeholder,
+html[data-theme] .composer-window input::placeholder,
+html[data-theme] .composer-window textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .search-shortcut,
+html[data-theme] .ghost-action,
+html[data-theme] .reply-button.secondary,
+html[data-theme] .icon-button {
+  background: var(--card);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+html[data-theme] .icon-button:hover {
+  border-color: transparent;
+}
+
+html[data-theme] .empty-icon {
+  background: var(--muted);
+  color: var(--muted-foreground);
+  border-color: var(--border);
+}
+
+html[data-theme] .empty-state,
+html[data-theme] .detail-placeholder,
+html[data-theme] .message-main p,
+html[data-theme] .message-head span,
+html[data-theme] .account-copy span,
+html[data-theme] .detail-meta span,
+html[data-theme] .detail-meta-row time,
+html[data-theme] .status-text {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .empty-state strong,
+html[data-theme] .detail-placeholder strong,
+html[data-theme] .detail-heading h2,
+html[data-theme] .message-content {
+  color: var(--foreground);
+}
+
+html[data-theme] .loading-line {
+  background: linear-gradient(90deg, var(--muted), var(--card), var(--muted));
+  background-size: 200% 100%;
+}
+
+html[data-theme] .login-visual {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+html[data-theme] .login-visual-copy p {
+  color: color-mix(in srgb, var(--secondary-foreground) 72%, transparent);
+}
+
+html[data-theme] .login-card {
+  box-shadow: 0 20px 60px color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+
+html[data-theme] .primary-action {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--primary) 22%, transparent);
+}
+
+
+/* Report/feedback floating control and dialog follow the active palette in light and dark mode. */
+html[data-theme] .report-issue-fab {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 45;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 25px color-mix(in srgb, var(--foreground) 14%, transparent);
+  cursor: pointer;
+  transition: transform .15s ease, filter .15s ease;
+}
+
+html[data-theme] .report-issue-fab:hover {
+  transform: translateY(-2px);
+  filter: brightness(.97);
+}
+
+html[data-theme] .report-issue-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 95;
+  background: color-mix(in srgb, var(--foreground) 38%, transparent);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+html[data-theme] .report-issue-dialog {
+  width: min(520px, 100%);
+  max-height: min(90dvh, 760px);
+  overflow: auto;
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 24px 80px color-mix(in srgb, var(--foreground) 20%, transparent);
+}
+
+html[data-theme] .report-issue-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+html[data-theme] .report-issue-kicker {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+html[data-theme] .report-issue-dialog h2 {
+  margin: 5px 0 0;
+  color: var(--foreground);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+html[data-theme] .report-issue-close {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+html[data-theme] .report-issue-close:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .report-issue-context {
+  margin-top: 14px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+html[data-theme] .report-issue-context strong {
+  color: var(--foreground);
+}
+
+html[data-theme] .report-issue-context-detail {
+  margin-top: 4px;
+}
+
+html[data-theme] .report-issue-textarea {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  border: 1px solid var(--input);
+  border-radius: 10px;
+  padding: 11px;
+  resize: vertical;
+  outline: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+html[data-theme] .report-issue-textarea::placeholder {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .report-issue-textarea:focus {
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 23%, transparent);
+}
+
+html[data-theme] .report-issue-help {
+  margin: 10px 0 0;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+html[data-theme] .report-issue-result {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary) 9%, var(--card));
+  color: var(--primary);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-wrap: anywhere;
+}
+
+html[data-theme] .report-issue-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+html[data-theme] .report-issue-cancel,
+html[data-theme] .report-issue-submit {
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+html[data-theme] .report-issue-cancel {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+}
+
+html[data-theme] .report-issue-cancel:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .report-issue-submit {
+  border: 1px solid transparent;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  padding-inline: 13px;
+}
+
+html[data-theme] .report-issue-submit:hover:not(:disabled) {
+  filter: brightness(.97);
+}
+
+html[data-theme] .report-issue-submit:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 540px) {
+  html[data-theme] .report-issue-backdrop {
+    padding: 10px;
+    align-items: end;
+  }
+
+  html[data-theme] .report-issue-dialog {
+    max-height: 92dvh;
+    padding: 16px;
+    border-radius: 16px;
+  }
+
+  html[data-theme] .report-issue-actions {
+    position: sticky;
+    bottom: -16px;
+    margin-inline: -16px;
+    margin-bottom: -16px;
+    padding: 12px 16px 16px;
+    background: var(--card);
+    border-top: 1px solid var(--border);
+  }
+}
+
+
+/* Inbox message-count toolbar and mailbox/user filters follow every active palette. */
+html[data-theme] .list-toolbar {
+  background: var(--card);
+  color: var(--muted-foreground);
+  border-bottom-color: var(--border);
+}
+
+html[data-theme] .mailbox-filter-bar {
+  background: var(--card);
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+
+html[data-theme] .mailbox-filter-label {
+  color: var(--muted-foreground);
+}
+
+html[data-theme] .mailbox-filter-scroll {
+  scrollbar-color: var(--border) transparent;
+}
+
+html[data-theme] .mailbox-chip {
+  border-color: var(--border);
+  background: var(--background);
+  color: var(--muted-foreground);
+  transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+
+html[data-theme] .mailbox-chip:hover {
+  border-color: var(--ring);
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+html[data-theme] .mailbox-chip.active {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+html[data-theme] .mailbox-chip:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
