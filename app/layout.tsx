@@ -16,6 +16,7 @@ import SearchNavigator from '@/components/search-navigator';
 import MarkAllRead from '@/components/mark-all-read';
 import ReportIssue from '@/components/report-issue';
 import ContactsBridge from '@/components/contacts-bridge';
+import ThemeAnnouncement from '@/components/theme-announcement';
 
 export const metadata: Metadata = {
   title: 'ABEmail Mail',
@@ -54,6 +55,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <MarkAllRead />
         <ReportIssue />
         <ContactsBridge />
+        <ThemeAnnouncement />
       </body>
     </html>
   );
